@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator", "src\PlanetGenerator\PlanetGenerator.csproj", "{BB16945F-10FC-405B-9419-06AA2E5D9371}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator.Unity", "src\PlanetGenerator.Unity\PlanetGenerator.Unity.csproj", "{F166A678-3A30-42DB-8BAE-36CBFF133E04}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB16945F-10FC-405B-9419-06AA2E5D9371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB16945F-10FC-405B-9419-06AA2E5D9371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB16945F-10FC-405B-9419-06AA2E5D9371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB16945F-10FC-405B-9419-06AA2E5D9371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E58C82AE-89CC-4B0B-B486-2BC317B4C5A2}
+	EndGlobalSection
+EndGlobal
