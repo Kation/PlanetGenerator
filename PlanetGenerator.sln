@@ -1,11 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31624.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator", "src\PlanetGenerator\PlanetGenerator.csproj", "{BB16945F-10FC-405B-9419-06AA2E5D9371}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator", "src\PlanetGenerator\PlanetGenerator.csproj", "{BB16945F-10FC-405B-9419-06AA2E5D9371}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator.Unity", "src\PlanetGenerator.Unity\PlanetGenerator.Unity.csproj", "{F166A678-3A30-42DB-8BAE-36CBFF133E04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.Unity", "src\PlanetGenerator.Unity\PlanetGenerator.Unity.csproj", "{F166A678-3A30-42DB-8BAE-36CBFF133E04}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1722540C-D1E3-4C99-A489-48F716CF088E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A0C2CA48-353C-41FB-863B-51D74D627C2E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.Testing", "test\PlanetGenerator.Testing\PlanetGenerator.Testing.csproj", "{88EE764A-37D0-4B50-8105-F8534D34313B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.Benchmark", "test\PlanetGenerator.Benchmark\PlanetGenerator.Benchmark.csproj", "{FEE46BC1-D72C-46EF-A488-48846DDCB8FA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.ILGPU", "src\PlanetGenerator.ILGPU\PlanetGenerator.ILGPU.csproj", "{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.PlanetViewer", "src\PlanetGenerator.PlanetViewer\PlanetGenerator.PlanetViewer.csproj", "{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator.Wpf", "src\PlanetGenerator.Wpf\PlanetGenerator.Wpf.csproj", "{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +35,38 @@ Global
 		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F166A678-3A30-42DB-8BAE-36CBFF133E04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88EE764A-37D0-4B50-8105-F8534D34313B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88EE764A-37D0-4B50-8105-F8534D34313B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88EE764A-37D0-4B50-8105-F8534D34313B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88EE764A-37D0-4B50-8105-F8534D34313B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEE46BC1-D72C-46EF-A488-48846DDCB8FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEE46BC1-D72C-46EF-A488-48846DDCB8FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEE46BC1-D72C-46EF-A488-48846DDCB8FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEE46BC1-D72C-46EF-A488-48846DDCB8FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BB16945F-10FC-405B-9419-06AA2E5D9371} = {1722540C-D1E3-4C99-A489-48F716CF088E}
+		{F166A678-3A30-42DB-8BAE-36CBFF133E04} = {1722540C-D1E3-4C99-A489-48F716CF088E}
+		{88EE764A-37D0-4B50-8105-F8534D34313B} = {A0C2CA48-353C-41FB-863B-51D74D627C2E}
+		{FEE46BC1-D72C-46EF-A488-48846DDCB8FA} = {A0C2CA48-353C-41FB-863B-51D74D627C2E}
+		{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2} = {1722540C-D1E3-4C99-A489-48F716CF088E}
+		{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482} = {1722540C-D1E3-4C99-A489-48F716CF088E}
+		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71} = {1722540C-D1E3-4C99-A489-48F716CF088E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E58C82AE-89CC-4B0B-B486-2BC317B4C5A2}
