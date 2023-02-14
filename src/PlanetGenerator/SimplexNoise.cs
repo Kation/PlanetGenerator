@@ -233,23 +233,28 @@ namespace PlanetGenerator
             skewFromCell = SkewValue<float[,]>.SkewFromCell;
             sample = SkewValue<float[,]>.Sample;
             float skewFromOrigin = skewFromCell;
+            //变形至单元格的差值
             skewToCell *= sum;
             //单元格原点总和
             var cellPositionX = x + skewToCell;
             var cellPositionY = y + skewToCell;
             var cellFloorX = Floor(cellPositionX);
             var cellFloorY = Floor(cellPositionY);
+            //单元格起点坐标
             var cellFloorXInt = (int)cellFloorX;
             var cellFloorYInt = (int)cellFloorY;
             sum = cellFloorX + cellFloorY;
             //单元格原点转换为单型原点差值
             skewFromOrigin *= sum;
+            //单元格原点在单型里的坐标
             var simplexFloorX = cellFloorX - skewFromOrigin;
             var simplexFloorY = cellFloorY - skewFromOrigin;
 
+            //输入点到单元格起点坐标差值
             var simplexOffset0x = x - simplexFloorX;
             var simplexOffset0y = y - simplexFloorY;
 
+            //计算单元格第二个点的位置
             int cellOffset1x, cellOffset1y;
             if (cellPositionX - cellFloorX >= cellPositionY - cellFloorY)
             {
@@ -261,9 +266,10 @@ namespace PlanetGenerator
                 cellOffset1x = 0;
                 cellOffset1y = 1;
             }
-
+            //输入点到单型第二个点坐标的差值
             var simplexOffset1x = simplexOffset0x - cellOffset1x + skewFromCell;
             var simplexOffset1y = simplexOffset0y - cellOffset1y + skewFromCell;
+            //输入点到单型终点坐标的差值
             var simplexOffset2x = simplexOffset0x - 1 + 2 * skewFromCell;
             var simplexOffset2y = simplexOffset0y - 1 + 2 * skewFromCell;
 
@@ -764,6 +770,7 @@ namespace PlanetGenerator
                 throw new ArgumentException("All length of dimension positions array should be same.");
             if (x.Length == 0)
                 throw new ArgumentException("Positions could not be empty.");
+            //没有硬件加速则使用普通并行计算
             if (!Vector.IsHardwareAccelerated)
             {
                 var v = new float[x.Length];
@@ -774,6 +781,7 @@ namespace PlanetGenerator
                 return v;
             }
             var count = x.Length;
+            //计算不对齐SIMD长度的数据大小
             var adjust = count % _VectorLength;
             if (adjust > 0)
             {
@@ -782,11 +790,15 @@ namespace PlanetGenerator
                 Array.Resize(ref x, count);
                 Array.Resize(ref y, count);
             }
+            //向量个数
             var vectorCount = count / _VectorLength;
+            //返回值数组
             var values = new float[count];
             float skewToCell, skewFromCell;
+            //原始变形值
             skewToCell = SkewValue<float[,]>.SkewToCell;
             skewFromCell = SkewValue<float[,]>.SkewFromCell;
+            //初始化通用向量
             var skewToCellVector = new Vector<float>(skewToCell);
             var sample = new Vector<float>(SkewValue<float[,]>.Sample);
             var v2 = new Vector<float>(2f);
@@ -797,16 +809,19 @@ namespace PlanetGenerator
             //float[] 
             Parallel.For(0, vectorCount, c =>
             {
+                //当前向量组对应的数组索引
                 var index = c * _VectorLength;
+                //将数组中对应的数据转为向量
                 var pxSpan = MemoryMarshal.Cast<float, Vector<float>>(x);
                 var pySpan = MemoryMarshal.Cast<float, Vector<float>>(y);
                 ref var px = ref pxSpan[c];
                 ref var py = ref pySpan[c];
                 var valuesSpan = MemoryMarshal.Cast<float, Vector<float>>(values);
+                //对应的返回值数组向量
                 ref var sumValueVector = ref valuesSpan[c];
                 //计算单型到单元格变形值
                 var skew = (skewToCellVector * (px + py));
-                //单元格坐标
+                //单元格起点坐标
                 var cellX = px + skew;
                 var cellY = py + skew;
                 Vector<float> cellXFloor, cellYFloor;
@@ -830,22 +845,29 @@ namespace PlanetGenerator
                 cellXFloor = Vector.ConvertToSingle(cellXFloorInt);
                 cellYFloor = Vector.ConvertToSingle(cellYFloorInt);
 #endif
+                //计算单元格第二个点的位置
                 var xOffset = cellX - cellXFloor;
                 var yOffset = cellY - cellYFloor;
                 var compareResult = Vector.GreaterThanOrEqual(xOffset, yOffset);
                 var xOffsetInt = Vector.ConditionalSelect(compareResult, _Int1Vector, _Int0Vector);
                 var yOffsetInt = Vector.ConditionalSelect(compareResult, _Int0Vector, _Int1Vector);
 
+                //单元格原点转换为单型原点差值
                 skew = vskewFromCell1 * (cellXFloor + cellYFloor);
+                //单元格原点在单型里的坐标
                 var simplexXFloor = cellXFloor - skew;
                 var simplexYFloor = cellYFloor - skew;
+                //输入点到单元格起点坐标差值
                 var ox1 = px - simplexXFloor;
                 var oy1 = py - simplexYFloor;
+                //输入点到单元格第二个坐标点差值
                 var ox2 = ox1 - Vector.ConvertToSingle(xOffsetInt) + vskewFromCell1;
                 var oy2 = oy1 - Vector.ConvertToSingle(yOffsetInt) + vskewFromCell1;
+                //输入点到单元格终点坐标差值
                 var ox3 = ox1 - v1 + vskewFromCell2;
                 var oy3 = oy1 - v1 + vskewFromCell2;
 
+                //计算梯度
                 Vector<int> cellGradX = cellXFloorInt * PrimeX,
                             cellGradY = cellYFloorInt * PrimeY;
                 //顶点0
