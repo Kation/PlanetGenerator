@@ -1,17 +1,19 @@
 ﻿using BenchmarkDotNet.Attributes;
-using ILGPU;
-using ILGPU.Runtime.Cuda;
-using ILGPU.Runtime.OpenCL;
+//using ILGPU;
+//using ILGPU.Runtime.Cuda;
+//using ILGPU.Runtime.OpenCL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PlanetGenerator.Benchmark
 {
     //[SimpleJob]
-    public class Noise2DBenchmark
+    public unsafe class Noise2DBenchmark
     {
         private const int _Width = 8192, _Height = 8192;
 
@@ -32,28 +34,31 @@ namespace PlanetGenerator.Benchmark
             });
         }
 
-        private float[] _px, _py;
+        private void* _px, _py;
+
         [GlobalSetup]
-        public void GlobalSetup()
+        public unsafe void GlobalSetup()
         {
-            _px = new float[_Width * _Height];
-            _py = new float[_px.Length];
-            Parallel.For(0, _Width, x =>
+            _px = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
+            _py = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
+            var px = new Span<float>(_px, _Width * _Height);//new float[_Width * _Height];
+            var py = new Span<float>(_py, _Width * _Height);//new float[_px.Length];
+            for (int x = 0; x < _Width; x++)
             {
-                Parallel.For(0, _Height, y =>
+                for (int y = 0; y < _Height; y++)
                 {
                     var i = x + y * _Width;
-                    _px[i] = (x / 40f);
-                    _py[i] = (y / 40f);
-                });
-            });
+                    px[i] = (x / 40f);
+                    py[i] = (y / 40f);
+                }
+            }
         }
 
         [Benchmark]
         public void SimplexSIMD()
         {
             var noise = new SimplexNoise(1);
-            var values = noise.GetRange(_px, _py);
+            var values = noise.GetRange(_px, _py, _Width * _Height);
         }
 
         //[Benchmark]
