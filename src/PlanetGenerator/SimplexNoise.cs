@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PlanetGenerator
 {
-    public class SimplexNoise : INoise
+    public class SimplexNoise// : INoise
     {
         private static readonly int _VectorLength, _VectorLength2, _VectorLength3, _VectorLength4;
         private static readonly Vector<int> _Int0Vector, _Int1Vector, _Int2Vector, _Int3Vector;
@@ -760,36 +760,36 @@ namespace PlanetGenerator
             return values;
         }
 
-        public virtual float[] GetRange(float[] x, float[] y)
+        public unsafe virtual float[] GetRange(void* x, void* y, int length)
         {
-            if (x == null)
-                throw new ArgumentNullException(nameof(x));
-            if (y == null)
-                throw new ArgumentNullException(nameof(y));
-            if (x.Length != y.Length)
-                throw new ArgumentException("All length of dimension positions array should be same.");
-            if (x.Length == 0)
-                throw new ArgumentException("Positions could not be empty.");
-            //没有硬件加速则使用普通并行计算
-            if (!Vector.IsHardwareAccelerated)
-            {
-                var v = new float[x.Length];
-                Parallel.For(0, v.Length, i =>
-                {
-                    v[i] = Get(x[i], y[i]);
-                });
-                return v;
-            }
-            var count = x.Length;
-            //计算不对齐SIMD长度的数据大小
-            var adjust = count % _VectorLength;
-            if (adjust > 0)
-            {
-                count = count + _VectorLength - adjust;
-                //对齐向量长度
-                Array.Resize(ref x, count);
-                Array.Resize(ref y, count);
-            }
+            //if (x == null)
+            //    throw new ArgumentNullException(nameof(x));
+            //if (y == null)
+            //    throw new ArgumentNullException(nameof(y));
+            //if (x.Length != y.Length)
+            //    throw new ArgumentException("All length of dimension positions array should be same.");
+            //if (x.Length == 0)
+            //    throw new ArgumentException("Positions could not be empty.");
+            ////没有硬件加速则使用普通并行计算
+            //if (!Vector.IsHardwareAccelerated)
+            //{
+            //    var v = new float[x.Length];
+            //    Parallel.For(0, v.Length, i =>
+            //    {
+            //        v[i] = Get(x[i], y[i]);
+            //    });
+            //    return v;
+            //}
+            var count = length;
+            ////计算不对齐SIMD长度的数据大小
+            //var adjust = count % _VectorLength;
+            //if (adjust > 0)
+            //{
+            //    count = count + _VectorLength - adjust;
+            //    //对齐向量长度
+            //    Array.Resize(ref x, count);
+            //    Array.Resize(ref y, count);
+            //}
             //向量个数
             var vectorCount = count / _VectorLength;
             //返回值数组
@@ -801,21 +801,19 @@ namespace PlanetGenerator
             //初始化通用向量
             var skewToCellVector = new Vector<float>(skewToCell);
             var sample = new Vector<float>(SkewValue<float[,]>.Sample);
-            var v2 = new Vector<float>(2f);
-            var v1 = Vector<float>.One;
             var vskewFromCell1 = new Vector<float>(skewFromCell);
-            var vskewFromCell2 = new Vector<float>(skewFromCell * 2);
+            var vskewFromCell2 = new Vector<float>(skewFromCell * 2) + Vector<float>.One;
 
             //float[] 
-            Parallel.For(0, vectorCount, c =>
+            Parallel.For(0, vectorCount, new ParallelOptions { MaxDegreeOfParallelism = 16 }, c =>
             {
                 //当前向量组对应的数组索引
                 var index = c * _VectorLength;
                 //将数组中对应的数据转为向量
-                var pxSpan = MemoryMarshal.Cast<float, Vector<float>>(x);
-                var pySpan = MemoryMarshal.Cast<float, Vector<float>>(y);
-                ref var px = ref pxSpan[c];
-                ref var py = ref pySpan[c];
+                //var pxSpan = new Span<Vector<float>>(x, vectorCount);// MemoryMarshal.Cast<float, Vector<float>>(x);
+                //var pySpan = new Span<Vector<float>>(y, vectorCount);// MemoryMarshal.Cast<float, Vector<float>>(y);
+                ref var px = ref Unsafe.AsRef<Vector<float>>((new IntPtr(x) + (int)(c * _VectorLength)).ToPointer());//  pxSpan[c];
+                ref var py = ref Unsafe.AsRef<Vector<float>>((new IntPtr(y) + (int)(c * _VectorLength)).ToPointer());//pySpan[c];
                 var valuesSpan = MemoryMarshal.Cast<float, Vector<float>>(values);
                 //对应的返回值数组向量
                 ref var sumValueVector = ref valuesSpan[c];
@@ -827,30 +825,17 @@ namespace PlanetGenerator
                 Vector<float> cellXFloor, cellYFloor;
                 Vector<int> cellXFloorInt, cellYFloorInt;
                 //单元格原点坐标
-#if NET5_0
+
                 cellXFloor = Vector.Floor(cellX);
                 cellYFloor = Vector.Floor(cellY);
                 cellXFloorInt = Vector.ConvertToInt32(cellXFloor);
                 cellYFloorInt = Vector.ConvertToInt32(cellYFloor);
-#else
-                var cellXFloorData = new int[_VectorLength];
-                var cellYFloorData = new int[_VectorLength];
-                for (var i = 0; i < _VectorLength; i++)
-                {
-                    cellXFloorData[i] = (int)MathF.Floor(cellX[i]);
-                    cellYFloorData[i] = (int)MathF.Floor(cellY[i]);
-                }
-                cellXFloorInt = new Vector<int>(cellXFloorData);
-                cellYFloorInt = new Vector<int>(cellYFloorData);
-                cellXFloor = Vector.ConvertToSingle(cellXFloorInt);
-                cellYFloor = Vector.ConvertToSingle(cellYFloorInt);
-#endif
                 //计算单元格第二个点的位置
                 var xOffset = cellX - cellXFloor;
                 var yOffset = cellY - cellYFloor;
                 var compareResult = Vector.GreaterThanOrEqual(xOffset, yOffset);
-                var xOffsetInt = Vector.ConditionalSelect(compareResult, _Int1Vector, _Int0Vector);
-                var yOffsetInt = Vector.ConditionalSelect(compareResult, _Int0Vector, _Int1Vector);
+                var xOffsetInt = Vector.ConditionalSelect(compareResult, Vector<int>.One, Vector<int>.Zero);
+                var yOffsetInt = Vector.ConditionalSelect(compareResult, Vector<int>.Zero, Vector<int>.One);
 
                 //单元格原点转换为单型原点差值
                 skew = vskewFromCell1 * (cellXFloor + cellYFloor);
@@ -864,8 +849,8 @@ namespace PlanetGenerator
                 var ox2 = ox1 - Vector.ConvertToSingle(xOffsetInt) + vskewFromCell1;
                 var oy2 = oy1 - Vector.ConvertToSingle(yOffsetInt) + vskewFromCell1;
                 //输入点到单元格终点坐标差值
-                var ox3 = ox1 - v1 + vskewFromCell2;
-                var oy3 = oy1 - v1 + vskewFromCell2;
+                var ox3 = ox1 - vskewFromCell2;
+                var oy3 = oy1 - vskewFromCell2;
 
                 //计算梯度
                 Vector<int> cellGradX = cellXFloorInt * PrimeX,
@@ -1331,7 +1316,7 @@ namespace PlanetGenerator
             for (int i = 0; i < _VectorLength; i++)
                 hashData[i] = vector[i] >> value;
             return new Vector<int>(hashData);
-        }        
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<float> offsetX)
         {

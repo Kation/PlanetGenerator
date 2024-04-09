@@ -38,13 +38,17 @@ namespace PlanetGenerator
             _accelerator.Dispose();
         }
 
-        public override float[] GetRange(float[] x, float[] y)
+        public unsafe override float[] GetRange(void* x, void* y, int length)
         {
             var kernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>>(GetRange);
-            var mx = _accelerator.Allocate1D(x);
-            var my = _accelerator.Allocate1D(y);
-            var mv = _accelerator.Allocate1D<float>(x.Length);
-            kernel(x.Length, _permFloatBuffer.View, mx.View, my.View, mv.View);
+            var mx = _accelerator.Allocate1D<float>(length);
+            var my = _accelerator.Allocate1D<float>(length);
+            var mv = _accelerator.Allocate1D<float>(length);
+            ref var xRef = ref Unsafe.AsRef<float>(x);
+            ref var yRef = ref Unsafe.AsRef<float>(y);
+            mx.View.CopyFromCPU(ref xRef, length);
+            my.View.CopyFromCPU(ref yRef, length);
+            kernel(length, _permFloatBuffer.View, mx.View, my.View, mv.View);
             var values = mv.GetAsArray1D();
             mv.Dispose();
             mx.Dispose();
