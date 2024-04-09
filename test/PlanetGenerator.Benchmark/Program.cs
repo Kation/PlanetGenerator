@@ -28,7 +28,7 @@ class Program
             .AddJob(Job.Default
                 .WithPlatform(BenchmarkDotNet.Environments.Platform.X64)
                 .WithJit(Jit.Default)
-                .WithRuntime(CoreRuntime.Core60));
+                .WithRuntime(CoreRuntime.Core80));
 
         BenchmarkSwitcher
             .FromAssembly(typeof(Program).Assembly)
