@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-//using ILGPU;
-//using ILGPU.Runtime.Cuda;
-//using ILGPU.Runtime.OpenCL;
+using ILGPU;
+using ILGPU.Runtime.Cuda;
+using ILGPU.Runtime.OpenCL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,13 +61,13 @@ namespace PlanetGenerator.Benchmark
             var values = noise.GetRange(_px, _py, _Width * _Height);
         }
 
-        //[Benchmark]
-        //public void SimplexOpenCL()
-        //{
-        //    using var context = Context.Create(builder => builder.OpenCL());
-        //    var noise = new GPUSimplexNoise(1, context, context.GetCLDevice(0));
-        //    var values = noise.GetRange(_px, _py);
-        //}
+        [Benchmark]
+        public void SimplexOpenCL()
+        {
+            using var context = Context.Create(builder => builder.OpenCL());
+            var noise = new GPUSimplexNoise(1, context, context.GetCLDevice(0));
+            var values = noise.GetRange(_px, _py, _Width * _Height);
+        }
 
         //[Benchmark]
         //public void SimplexCUDA()
