@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -855,6 +856,7 @@ namespace PlanetGenerator
                 //计算梯度
                 Vector<int> cellGradX = cellXFloorInt * PrimeX,
                             cellGradY = cellYFloorInt * PrimeY;
+                var permData = new float[_VectorLength2];
                 //顶点0
                 {
                     //x
@@ -865,7 +867,7 @@ namespace PlanetGenerator
                     sum = Vector.Max(Vector<float>.Zero, sum);
                     sum *= sum;
                     sum *= sum;
-                    sum *= GradRange(cellGradX, cellGradY, ox1, oy1);
+                    sum *= GradRange(cellGradX, cellGradY, ox1, oy1, permData);
                     sumValueVector = sum;
                 }
                 {
@@ -877,7 +879,7 @@ namespace PlanetGenerator
                     sum = Vector.Max(Vector<float>.Zero, sum);
                     sum *= sum;
                     sum *= sum;
-                    sum *= GradRange(cellGradX + xOffsetInt * _PrimeXVector, cellGradY + yOffsetInt * _PrimeYVector, ox2, oy2);
+                    sum *= GradRange(cellGradX + xOffsetInt * _PrimeXVector, cellGradY + yOffsetInt * _PrimeYVector, ox2, oy2, permData);
                     sumValueVector += sum;
                 }
                 {
@@ -889,7 +891,7 @@ namespace PlanetGenerator
                     sum = Vector.Max(Vector<float>.Zero, sum);
                     sum *= sum;
                     sum *= sum;
-                    sum *= GradRange(cellGradX + _PrimeXVector, cellGradY + _PrimeYVector, ox3, oy3);
+                    sum *= GradRange(cellGradX + _PrimeXVector, cellGradY + _PrimeYVector, ox3, oy3, permData);
                     sumValueVector += sum;
                 }
                 sumValueVector *= sample;
@@ -1331,16 +1333,15 @@ namespace PlanetGenerator
             return new Vector<float>(permData) * offsetX;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected unsafe virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<int> positionY, in Vector<float> offsetX, in Vector<float> offsetY)
+        protected unsafe virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<int> positionY, in Vector<float> offsetX, in Vector<float> offsetY, in Span<float> permData)
         {
             var hash = positionX ^ positionY;
             hash *= _PrimeGVector;
             hash ^= hash >> 15;
             var hashX = hash & _HashAnd2Vector;
             var hashY = hashX | _Int1Vector;
-            //var permDataPtr = NativeMemory.AlignedAlloc((nuint)_VectorLength2 * sizeof(float), (nuint)_VectorLength);
             //var permData = new Span<float>(permDataPtr, _VectorLength2);
-            var permData = new float[_VectorLength * 2];
+            //var permData = new float[_VectorLength * 2];
             for (int i = 0; i < _VectorLength; i++)
             {
                 permData[i] = _permFloat[hashX[i]];
@@ -1349,7 +1350,6 @@ namespace PlanetGenerator
             //return new Vector<float>(permData) * offsetX + new Vector<float>(permData, _VectorLength) * offsetY;
             var vector = MemoryMarshal.Cast<float, Vector<float>>(permData);
             var result = vector[0] * offsetX + vector[1] * offsetY;
-            //NativeMemory.AlignedFree(permDataPtr);
             return result;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
