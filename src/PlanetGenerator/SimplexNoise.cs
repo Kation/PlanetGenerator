@@ -805,7 +805,7 @@ namespace PlanetGenerator
             var vskewFromCell2 = new Vector<float>(skewFromCell * 2) + Vector<float>.One;
 
             //float[] 
-            Parallel.For(0, vectorCount, new ParallelOptions { MaxDegreeOfParallelism = 16 }, c =>
+            Parallel.For(0, vectorCount, c =>
             {
                 //当前向量组对应的数组索引
                 var index = c * _VectorLength;
@@ -814,9 +814,9 @@ namespace PlanetGenerator
                 //var pySpan = new Span<Vector<float>>(y, vectorCount);// MemoryMarshal.Cast<float, Vector<float>>(y);
                 ref var px = ref Unsafe.AsRef<Vector<float>>((new IntPtr(x) + (int)(c * _VectorLength)).ToPointer());//  pxSpan[c];
                 ref var py = ref Unsafe.AsRef<Vector<float>>((new IntPtr(y) + (int)(c * _VectorLength)).ToPointer());//pySpan[c];
-                var valuesSpan = MemoryMarshal.Cast<float, Vector<float>>(values);
+                //var valuesSpan = MemoryMarshal.Cast<float, Vector<float>>(values);
                 //对应的返回值数组向量
-                ref var sumValueVector = ref valuesSpan[c];
+                ref var sumValueVector = ref Unsafe.As<float, Vector<float>>(ref values[index]);// ref valuesSpan[c];
                 //计算单型到单元格变形值
                 var skew = (skewToCellVector * (px + py));
                 //单元格起点坐标
@@ -1312,10 +1312,11 @@ namespace PlanetGenerator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Vector<int> ShiftRight(in Vector<int> vector, in int value)
         {
-            var hashData = new int[_VectorLength];
-            for (int i = 0; i < _VectorLength; i++)
-                hashData[i] = vector[i] >> value;
-            return new Vector<int>(hashData);
+            return Vector.ShiftRightLogical(vector, value);
+            //var hashData = new int[_VectorLength];
+            //for (int i = 0; i < _VectorLength; i++)
+            //    hashData[i] = vector[i] >> value;
+            //return new Vector<int>(hashData);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<float> offsetX)
@@ -1339,6 +1340,7 @@ namespace PlanetGenerator
             var hashX = hash & _HashAnd2Vector;
             var hashY = hashX | _Int1Vector;
             var permData = new float[_VectorLength * 2];
+            
             for (int i = 0; i < _VectorLength; i++)
             {
                 permData[i] = HashFloat(hashX[i]);
