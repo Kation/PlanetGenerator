@@ -20,7 +20,7 @@ namespace PlanetGenerator
 
         float[] GetRange(float[] x);
 
-        float[] GetRange(float[] x, float[] y);
+        void GetRange(IntPtr x, IntPtr y, IntPtr values, int length);
 
         float[] GetRange(float[] x, float[] y, float[] z);
 

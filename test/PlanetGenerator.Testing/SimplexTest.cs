@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace PlanetGenerator.Testing
@@ -97,7 +99,7 @@ namespace PlanetGenerator.Testing
         }
 
         [Fact]
-        public void D2SIMD()
+        public unsafe void D2SIMD()
         {
             int min = 255, max = 0;
             //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
@@ -115,15 +117,20 @@ namespace PlanetGenerator.Testing
             //noise.Get(120f / 200f, 113f / 200f);
             //float[,] values = new float[100, 100];
             Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            float[] px = new float[bitmap.Width * bitmap.Height];
-            float[] py = new float[px.Length];
+            var length = bitmap.Width * bitmap.Height;
+            var alignment = (nuint)(sizeof(float) * Vector<float>.Count);
+            var px = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
+            var py = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
+            var pvalues = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
+            var xSpan = new Span<float>(px, length);
+            var ySpan = new Span<float>(py, length);
             for (int x = 0; x < bitmap.Width; x++)
             {
                 for (int y = 0; y < bitmap.Height; y++)
                 {
                     var i = x + y * bitmap.Width;
-                    px[i] = (x / 80f);
-                    py[i] = (y / 80f);
+                    xSpan[i] = (x / 80f);
+                    ySpan[i] = (y / 80f);
                     //x0 *= 2;
                     //y0 *= 2;
                     //value += 0.5f * noise.Get(x0, y0);
@@ -153,12 +160,13 @@ namespace PlanetGenerator.Testing
                     //value /= 2;
                 }
             }
-            var values = noise.GetRange(px, py);
+            noise.GetRange(new IntPtr(px), new IntPtr(py), new IntPtr(pvalues), length);
+            var valuesSpan = new Span<float>(pvalues, length);
             for (int x = 0; x < bitmap.Width; x++)
             {
                 for (int y = 0; y < bitmap.Height; y++)
                 {
-                    var value = values[x + y * bitmap.Width];
+                    var value = valuesSpan[x + y * bitmap.Width];
                     int c = (int)((value * 255) + 255) / 2;
                     if (c < min)
                         min = c;
@@ -173,6 +181,9 @@ namespace PlanetGenerator.Testing
             }
             bitmap.Save("d2simd.png", ImageFormat.Png);
             bitmap.Dispose();
+            NativeMemory.AlignedFree(px);
+            NativeMemory.AlignedFree(py);
+            NativeMemory.AlignedFree(pvalues);
         }
 
         [Fact]

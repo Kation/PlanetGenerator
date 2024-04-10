@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PlanetGenerator
 {
-    public class SimplexNoise// : INoise
+    public class SimplexNoise : INoise
     {
         private static readonly int _VectorLength, _VectorLength2, _VectorLength3, _VectorLength4;
         private static readonly Vector<int> _Int0Vector, _Int1Vector, _Int2Vector, _Int3Vector;
@@ -760,7 +760,7 @@ namespace PlanetGenerator
             return values;
         }
 
-        public unsafe virtual float[] GetRange(void* x, void* y, int length)
+        public unsafe virtual void GetRange(IntPtr x, IntPtr y, IntPtr values, int length)
         {
             //if (x == null)
             //    throw new ArgumentNullException(nameof(x));
@@ -793,7 +793,7 @@ namespace PlanetGenerator
             //向量个数
             var vectorCount = count / _VectorLength;
             //返回值数组
-            var values = new float[count];
+            //var values = new float[count];
             float skewToCell, skewFromCell;
             //原始变形值
             skewToCell = SkewValue<float[,]>.SkewToCell;
@@ -812,11 +812,11 @@ namespace PlanetGenerator
                 //将数组中对应的数据转为向量
                 //var pxSpan = new Span<Vector<float>>(x, vectorCount);// MemoryMarshal.Cast<float, Vector<float>>(x);
                 //var pySpan = new Span<Vector<float>>(y, vectorCount);// MemoryMarshal.Cast<float, Vector<float>>(y);
-                ref var px = ref Unsafe.AsRef<Vector<float>>((new IntPtr(x) + (int)(c * _VectorLength)).ToPointer());//  pxSpan[c];
-                ref var py = ref Unsafe.AsRef<Vector<float>>((new IntPtr(y) + (int)(c * _VectorLength)).ToPointer());//pySpan[c];
+                ref var px = ref Unsafe.AsRef<Vector<float>>((x + index).ToPointer());//  pxSpan[c];
+                ref var py = ref Unsafe.AsRef<Vector<float>>((y + index).ToPointer());//pySpan[c];
                 //var valuesSpan = MemoryMarshal.Cast<float, Vector<float>>(values);
                 //对应的返回值数组向量
-                ref var sumValueVector = ref Unsafe.As<float, Vector<float>>(ref values[index]);// ref valuesSpan[c];
+                ref var sumValueVector = ref Unsafe.AsRef<Vector<float>>((values + index).ToPointer());// ref valuesSpan[c];
                 //计算单型到单元格变形值
                 var skew = (skewToCellVector * (px + py));
                 //单元格起点坐标
@@ -894,7 +894,6 @@ namespace PlanetGenerator
                 }
                 sumValueVector *= sample;
             });
-            return values;
         }
 
         public virtual float[] GetRange(float[] x, float[] y, float[] z)
@@ -1332,21 +1331,26 @@ namespace PlanetGenerator
             return new Vector<float>(permData) * offsetX;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<int> positionY, in Vector<float> offsetX, in Vector<float> offsetY)
+        protected unsafe virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<int> positionY, in Vector<float> offsetX, in Vector<float> offsetY)
         {
             var hash = positionX ^ positionY;
             hash *= _PrimeGVector;
-            hash ^= ShiftRight(hash, 15);
+            hash ^= hash >> 15;
             var hashX = hash & _HashAnd2Vector;
             var hashY = hashX | _Int1Vector;
+            //var permDataPtr = NativeMemory.AlignedAlloc((nuint)_VectorLength2 * sizeof(float), (nuint)_VectorLength);
+            //var permData = new Span<float>(permDataPtr, _VectorLength2);
             var permData = new float[_VectorLength * 2];
-            
             for (int i = 0; i < _VectorLength; i++)
             {
-                permData[i] = HashFloat(hashX[i]);
-                permData[_VectorLength + i] = HashFloat(hashY[i]);
+                permData[i] = _permFloat[hashX[i]];
+                permData[_VectorLength + i] = _permFloat[hashY[i]];
             }
-            return new Vector<float>(permData) * offsetX + new Vector<float>(permData, _VectorLength) * offsetY;
+            //return new Vector<float>(permData) * offsetX + new Vector<float>(permData, _VectorLength) * offsetY;
+            var vector = MemoryMarshal.Cast<float, Vector<float>>(permData);
+            var result = vector[0] * offsetX + vector[1] * offsetY;
+            //NativeMemory.AlignedFree(permDataPtr);
+            return result;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual Vector<float> GradRange(in Vector<int> positionX, in Vector<int> positionY, in Vector<int> positionZ, in Vector<float> offsetX, in Vector<float> offsetY, in Vector<float> offsetZ)

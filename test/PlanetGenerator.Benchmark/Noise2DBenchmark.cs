@@ -20,7 +20,6 @@ namespace PlanetGenerator.Benchmark
         [Benchmark(Baseline = true)]
         public void SimplexParallel()
         {
-            var noise = new SimplexNoise(1);
             float[,] data = new float[_Width, _Height];
             Parallel.For(0, _Width, x =>
             {
@@ -28,19 +27,20 @@ namespace PlanetGenerator.Benchmark
                 {
                     var x0 = (x / 40f);
                     var y0 = (y / 40f);
-                    var value = noise.Get(x0, y0);
+                    var value = _noise.Get(x0, y0);
                     data[x, y] = value;
                 });
             });
         }
 
-        private void* _px, _py;
-
+        private void* _px, _py, _pvalues;
+        private SimplexNoise _noise;
         [GlobalSetup]
         public unsafe void GlobalSetup()
         {
             _px = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
             _py = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
+            _pvalues = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
             var px = new Span<float>(_px, _Width * _Height);//new float[_Width * _Height];
             var py = new Span<float>(_py, _Width * _Height);//new float[_px.Length];
             for (int x = 0; x < _Width; x++)
@@ -52,22 +52,22 @@ namespace PlanetGenerator.Benchmark
                     py[i] = (y / 40f);
                 }
             }
+            _noise = new SimplexNoise(1);
         }
 
         [Benchmark]
         public void SimplexSIMD()
         {
-            var noise = new SimplexNoise(1);
-            var values = noise.GetRange(_px, _py, _Width * _Height);
+            _noise.GetRange(new IntPtr(_px), new IntPtr(_py), new IntPtr(_pvalues), _Width * _Height);
         }
 
-        [Benchmark]
-        public void SimplexOpenCL()
-        {
-            using var context = Context.Create(builder => builder.OpenCL());
-            var noise = new GPUSimplexNoise(1, context, context.GetCLDevice(0));
-            var values = noise.GetRange(_px, _py, _Width * _Height);
-        }
+        //[Benchmark]
+        //public void SimplexOpenCL()
+        //{
+        //    using var context = Context.Create(builder => builder.OpenCL());
+        //    var noise = new GPUSimplexNoise(1, context, context.GetCLDevice(0));
+        //    var values = noise.GetRange(_px, _py, _Width * _Height);
+        //}
 
         //[Benchmark]
         //public void SimplexCUDA()
