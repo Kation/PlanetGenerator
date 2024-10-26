@@ -51,41 +51,6 @@
                 <Slider x:Name="sunLight" Grid.Column="1" Margin="10,0,10,0" Minimum="0" Maximum="360"/>
             </Grid>
         </StackPanel>
-        <HelixToolkit:HelixViewport3D x:Name="view" Grid.Column="1" Grid.RowSpan="2" ZoomExtentsWhenLoaded="True" Background="Black" 
-                                      CameraRotationMode="Trackball" CameraMode="FixedPosition"
-                                      FixedRotationPointEnabled="True" FixedRotationPoint="0,0,0" RotateAroundMouseDownPoint="False"
-                                      IsZoomEnabled="False" IsPanEnabled="True" IsInertiaEnabled="False"
-                                      ShowFrameRate="True" ShowCameraInfo="True" ShowCoordinateSystem="True" ShowViewCube="False"
-                                      CalculateCursorPosition="True"
-                                      CoordinateSystemHorizontalPosition="Right" MouseWheel="view_MouseWheel"
-                                      MouseLeftButtonDown="view_MouseLeftButtonDown" MouseLeftButtonUp="view_MouseLeftButtonUp" MouseMove="view_MouseMove">
-            <HelixToolkit:HelixViewport3D.Camera>
-                <PerspectiveCamera x:Name="viewCamera" Position="11000,0,0" LookDirection="-1,0,0" UpDirection="0,1,0" FieldOfView="100"/>
-            </HelixToolkit:HelixViewport3D.Camera>
-            <ModelVisual3D x:Name="viewRoot">
-                <ModelVisual3D x:Name="viewLight">
-                    <ModelVisual3D.Content>
-                        <PointLight Color="LightYellow" Position="100000,0,0">
-                            <PointLight.Transform>
-                                <RotateTransform3D>
-                                    <RotateTransform3D.Rotation>
-                                        <AxisAngleRotation3D Axis="0,1,0" Angle="{Binding ElementName=sunLight, Path=Value, Mode=TwoWay}"/>
-                                    </RotateTransform3D.Rotation>
-                                </RotateTransform3D>
-                            </PointLight.Transform>
-                        </PointLight>
-                    </ModelVisual3D.Content>
-                </ModelVisual3D>
-            </ModelVisual3D>
-            <HelixToolkit:HelixViewport3D.Resources>
-                <Storyboard x:Key="cameraMoveStoryboard">
-                    <Point3DAnimation Storyboard.TargetName="viewCamera" Storyboard.TargetProperty="Position" Duration="0:0:1">
-                        <Point3DAnimation.EasingFunction>
-                            <CircleEase EasingMode="EaseOut"/>
-                        </Point3DAnimation.EasingFunction>
-                    </Point3DAnimation>
-                </Storyboard>
-            </HelixToolkit:HelixViewport3D.Resources>
-        </HelixToolkit:HelixViewport3D>
+        <local:StrideControl x:Name="stride" Grid.Column="1" Grid.RowSpan="2"/>
     </Grid>
 </Window>

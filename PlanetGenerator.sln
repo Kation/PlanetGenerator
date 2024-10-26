@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.ILGPU", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.PlanetViewer", "src\PlanetGenerator.PlanetViewer\PlanetGenerator.PlanetViewer.csproj", "{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator.Wpf", "src\PlanetGenerator.Wpf\PlanetGenerator.Wpf.csproj", "{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetGenerator.Wpf", "src\PlanetGenerator.Wpf\PlanetGenerator.Wpf.csproj", "{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetGenerator.Stride", "src\PlanetGenerator.Stride\PlanetGenerator.Stride.csproj", "{288EC338-4D6F-444A-B51A-33F8A33E11B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,10 @@ Global
 		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{288EC338-4D6F-444A-B51A-33F8A33E11B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{288EC338-4D6F-444A-B51A-33F8A33E11B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{288EC338-4D6F-444A-B51A-33F8A33E11B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{288EC338-4D6F-444A-B51A-33F8A33E11B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{C7264BE4-32F5-4F7D-AF76-2CD5F7F9CEE2} = {1722540C-D1E3-4C99-A489-48F716CF088E}
 		{FE7E3B06-8C89-48A4-847E-A1B6A6ACD482} = {1722540C-D1E3-4C99-A489-48F716CF088E}
 		{8CAE67E0-6D8B-4F6C-8AA2-F84C49DC4C71} = {1722540C-D1E3-4C99-A489-48F716CF088E}
+		{288EC338-4D6F-444A-B51A-33F8A33E11B3} = {1722540C-D1E3-4C99-A489-48F716CF088E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E58C82AE-89CC-4B0B-B486-2BC317B4C5A2}

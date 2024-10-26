@@ -10,27 +10,13 @@
 	<Import Project="$(WpfRepoRoot)\eng\wpf-debug.targets" />
 
 	<ItemGroup>
-	  <Page Remove="Test.xaml" />
-	  <Page Remove="Test2.xaml" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Test2.xaml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	    <SubType>Designer</SubType>
-	    <Generator>MSBuild:Compile</Generator>
-	  </None>
-	  <None Include="Test.xaml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<!--<PackageReference Include="Stride.Core.Assets.CompilerApp" Version="4.1.*" IncludeAssets="build;buildTransitive" />-->
-		<PackageReference Include="Stride.CommunityToolkit" Version="1.0.0-preview.12" />
-		<PackageReference Include="Stride.Engine" Version="4.1.*" />
-		<PackageReference Include="Stride.Particles" Version="4.1.*" />
-		<PackageReference Include="Stride.Physics" Version="4.1.*" />
+		<PackageReference Include="Stride.CommunityToolkit" Version="1.0.0-preview.45" />
+		<PackageReference Include="Stride.Core.Mathematics" Version="4.2.0.2232" />
+		<PackageReference Include="Stride.Core.Presentation.Wpf" Version="4.2.0.2232" />
+		<PackageReference Include="Stride.Engine" Version="4.2.0.2232" />
+		<PackageReference Include="Stride.Particles" Version="4.2.0.2232" />
+		<PackageReference Include="Stride.Physics" Version="4.2.0.2232" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -50,6 +36,12 @@
 	  <Reference Include="WindowsBase">
 	    <HintPath>..\..\..\wpf\artifacts\bin\WindowsBase\Debug\net8.0\WindowsBase.dll</HintPath>
 	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="white.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>
