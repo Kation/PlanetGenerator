@@ -7,11 +7,11 @@
 		<WpfRepoRoot>d:\code\wpf</WpfRepoRoot>
 		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
-	<Import Project="$(WpfRepoRoot)\eng\wpf-debug.targets" />
 
 	<ItemGroup>
 		<!--<PackageReference Include="Stride.Core.Assets.CompilerApp" Version="4.1.*" IncludeAssets="build;buildTransitive" />-->
 		<PackageReference Include="Stride.CommunityToolkit" Version="1.0.0-preview.45" />
+		<PackageReference Include="Stride.CommunityToolkit.Windows" Version="1.0.0-preview.45" />
 		<PackageReference Include="Stride.Core.Mathematics" Version="4.2.0.2232" />
 		<PackageReference Include="Stride.Core.Presentation.Wpf" Version="4.2.0.2232" />
 		<PackageReference Include="Stride.Engine" Version="4.2.0.2232" />
@@ -21,27 +21,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\PlanetGenerator.Stride\PlanetGenerator.Stride.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="PresentationCore">
-	    <HintPath>..\..\..\wpf\artifacts\bin\PresentationCore\Debug\net8.0\PresentationCore.dll</HintPath>
-	  </Reference>
-	  <Reference Include="PresentationFramework">
-	    <HintPath>..\..\..\wpf\artifacts\bin\PresentationFramework\Debug\net8.0\PresentationFramework.dll</HintPath>
-	  </Reference>
-	  <Reference Include="System.Xaml">
-	    <HintPath>..\..\..\wpf\artifacts\bin\System.Xaml\Debug\net8.0\System.Xaml.dll</HintPath>
-	  </Reference>
-	  <Reference Include="WindowsBase">
-	    <HintPath>..\..\..\wpf\artifacts\bin\WindowsBase\Debug\net8.0\WindowsBase.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="white.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 
 </Project>
