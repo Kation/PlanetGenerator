@@ -37,7 +37,7 @@ namespace PlanetGenerator
                     stream.Read(data);
                     var dataMemory = data.AsMemory();
                     ref var terrain = ref Unsafe.As<Memory<byte>, Memory<float>>(ref dataMemory);
-                    return new Tile(index, zoomLevel, terrain, _settings);
+                    return new Tile(index, zoomLevel, terrain, _settings, []);
                 }
             }
             {

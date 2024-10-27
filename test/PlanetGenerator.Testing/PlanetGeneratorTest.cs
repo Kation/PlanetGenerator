@@ -28,7 +28,6 @@ namespace PlanetGenerator.Testing
         {
             PlanetSettings settings = new PlanetSettings();
             settings.TileResolution = 128;
-            settings.Noise = new SimplexNoise(settings.Seed);
             PlanetBuilder generator = new PlanetBuilder(settings, new SimplexNoise(settings.Seed));
             var t0 = generator.GenerateTile(0, 1);
             var t1 = generator.GenerateTile(1, 1);

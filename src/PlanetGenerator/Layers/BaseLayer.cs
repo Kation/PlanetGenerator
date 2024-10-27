@@ -53,86 +53,6 @@ namespace PlanetGenerator.Layers
             }
             var length = context.PositionX.Length;
             var data = new float[length];
-            //for (int ii = 0; ii < plates.Count; ii++)
-            //{
-            //    var plate = plates[ii];
-
-            //    var px = context.Settings.PlanetRadius * MathF.Cos(plate.Y) * MathF.Cos(plate.X);
-            //    var pz = -context.Settings.PlanetRadius * MathF.Cos(plate.Y) * MathF.Sin(plate.X);
-            //    var py = context.Settings.PlanetRadius * MathF.Sin(plate.Y);
-
-            //    //List<EffectivePlate> effectivePlates = new List<EffectivePlate>();
-            //    for (int i = 0; i < length; i++)
-            //    {
-            //        //经过随机处理，计算实际半径
-            //        var angle = GetAngle(px, py, pz, context.PositionX[i], context.PositionY[i], context.PositionZ[i]);
-            //        if (plate.X >= 0)
-            //        {
-            //            if (context.Longitudes[i] < plate.X || ((context.Longitudes[i] - plate.X > MathF.PI) && context.Longitudes[i] - MathF.PI * 2 < plate.X))
-            //                angle = MathF.PI * 2 - angle;
-            //        }
-            //        else if (plate.X < 0)
-            //        {
-            //            if (context.Longitudes[i] - plate.X > MathF.PI && context.Longitudes[i] < plate.X + MathF.PI * 2)
-            //                angle = MathF.PI * 2 - MathF.PI;
-            //        }
-            //        float x, y;
-            //        const float right = MathF.PI / 2;
-            //        const float down = right * 2;
-            //        const float left = right * 3;
-            //        if (angle == 0)
-            //        {
-            //            x = 0; y = 1;
-            //        }
-            //        else if (angle == right)
-            //        {
-            //            x = 1; y = 0;
-            //        }
-            //        else if (angle == down)
-            //        {
-            //            x = 0; y = -1;
-            //        }
-            //        else if (angle == left)
-            //        {
-            //            x = -1; y = 0;
-            //        }
-            //        else
-            //        {
-            //            y = MathF.Cos(angle);
-            //            x = MathF.Sin(angle);
-            //        }
-            //        //var o = context.Noise.Get(x + ii * _Move1, y + ii * _Move1) * 1f;
-            //        var o = context.Noise.Get(x * 2 + ii * _Move1 + 100000, y * 2 + ii * _Move1 + 100000) * 0.9f;
-            //        o += context.Noise.Get(x * 4 + ii * _Move1 + 100000, y * 4 + ii * _Move1 + 100000) * 0.05f;
-            //        o += context.Noise.Get(x * 8 + ii * _Move1 + 200000, y * 8 + ii * _Move1 + 200000) * 0.025f;
-            //        o += context.Noise.Get(x * 16 + ii * _Move1 + 300000, y * 16 + ii * _Move1 + 300000) * 0.0125f;
-            //        var radiusActually = plate.Z * (1 + context.Settings.PlateMaxRadiusOffset * o);
-            //        var distance = GetDistance(context.Longitudes[i], context.Latitudes[i], plate.X, plate.Y, context.Settings.PlanetRadius);
-            //        if (distance < radiusActually * 2)
-            //        {
-            //            if (distance < 50)
-            //            {
-            //                data[i] += 50f;
-            //            }
-            //            if (distance < 100)
-            //            {
-            //                data[i] += 25f;
-            //            }
-            //            if (distance < 200)
-            //            {
-            //                data[i] += 10f;
-            //            }
-            //            if (distance < radiusActually)
-            //            {
-            //                data[i] += 10f * (1f - distance / radiusActually);
-            //            }
-            //            else
-            //            {
-            //                data[i] -= (distance / radiusActually - 1f) * -4f;
-            //            }
-            //        }
-            //    }
-            //}
             for (int i = 0; i < length; i++)
             {
                 List<EffectivePlate> effectivePlates = new List<EffectivePlate>();
@@ -270,6 +190,24 @@ namespace PlanetGenerator.Layers
                 }
             }
 
+            //断裂带计算            
+            var faultZone = new float[context.Settings.TileResolution * context.Settings.TextureMultiple * context.Settings.TileResolution * context.Settings.TextureMultiple];
+            var faultZoneSeedX = rnd.Next(0, 1000000);
+            var faultZoneSeedY = rnd.Next(0, 1000000);
+            var faultZoneSeedZ = rnd.Next(0, 1000000);
+            context.Textures.Add(new LayerTexture("FaultZone", faultZone, context.Settings.TileResolution * context.Settings.TextureMultiple));
+            if (context.Settings.TextureMultiple == 1)
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    var value = context.Noise.Get(faultZoneSeedX + context.PositionX[i] / 2000f, faultZoneSeedY + context.PositionY[i] / 2000f, faultZoneSeedZ + context.PositionZ[i] / 2000f);
+                    if (value < 0.5)
+                        value = 0f;
+                    //else
+                    //    value = (value - 0.5f) * 2f;
+                    faultZone[i] = value;
+                }
+            }
             context.CreateLayer(PlanetLayers.Plate, data);
         }
 

@@ -54,8 +54,6 @@ namespace PlanetGenerator
         ///// </summary>
         //public IEasingFunction MineralLineDistanceEasing { get; set; }
 
-        public INoise Noise { get; set; }
-
         /// <summary>
         /// 获取或设置板块数量。
         /// </summary>
@@ -81,5 +79,12 @@ namespace PlanetGenerator
         /// 0至1。数值越大越不规则，0为圆形。
         /// </summary>
         public float PlateMaxRadiusOffset { get; set; } = 0.2f;
+
+        /// <summary>
+        /// 获取或设置纹理倍数。
+        /// <br/>
+        /// 最小为1，或者为2的倍数。
+        /// </summary>
+        public int TextureMultiple { get; set; } = 4;
     }
 }

@@ -6,10 +6,17 @@ namespace PlanetGenerator
 {
     public class PlanetOptions
     {
-        public PlanetSettings Settings { get; set; }
+        public PlanetOptions(PlanetSettings settings, string savePath, INoise noise)
+        {
+            Settings = settings;
+            SavePath = savePath;
+            Noise = noise;
+        }
 
-        public string SavePath { get; set; }
+        public PlanetSettings Settings { get; }
 
-        public INoise Noise { get; set; }
+        public string SavePath { get; }
+
+        public INoise Noise { get;  }
     }
 }

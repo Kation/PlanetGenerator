@@ -104,9 +104,9 @@ namespace PlanetGenerator
                     break;
                 default:
                     var type = typeof(SkewValue<>).MakeGenericType(typeof(float).MakeArrayType(positions.Length));
-                    skewToCell = (float)type.GetField("SkewTo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).GetValue(null);
-                    skewFromCell = (float)type.GetField("SkewFrom", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).GetValue(null);
-                    sample = (float)type.GetField("Sample", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).GetValue(null);
+                    skewToCell = (float)type.GetField("SkewTo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!.GetValue(null)!;
+                    skewFromCell = (float)type.GetField("SkewFrom", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!.GetValue(null)!;
+                    sample = (float)type.GetField("Sample", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!.GetValue(null)!;
                     break;
             }
             float skewToOrigin = skewToCell;
@@ -682,7 +682,7 @@ namespace PlanetGenerator
                 });
                 return values;
             }
-            return null;
+            throw new NotSupportedException("Not supported dimension.");
         }
 
         public virtual float[] GetRange(float[] x)

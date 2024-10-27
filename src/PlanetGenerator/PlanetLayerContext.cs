@@ -24,21 +24,48 @@ namespace PlanetGenerator
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _layers = new Dictionary<string, float[]>();
             _length = settings.TileResolution * settings.TileResolution;
+            Textures = new List<LayerTexture>();
         }
 
+        /// <summary>
+        /// 获取X坐标数组。
+        /// </summary>
         public float[] PositionX { get; }
 
+        /// <summary>
+        /// 获取Y坐标数组。
+        /// </summary>
         public float[] PositionY { get; }
 
+        /// <summary>
+        /// 获取Z坐标数组。
+        /// </summary>
         public float[] PositionZ { get; }
 
+        /// <summary>
+        /// 获取经度数组。
+        /// </summary>
         public float[] Longitudes { get; }
 
+        /// <summary>
+        /// 获取纬度数组。
+        /// </summary>
         public float[] Latitudes { get; }
 
+        /// <summary>
+        /// 获取噪声。
+        /// </summary>
         public INoise Noise { get; }
 
+        /// <summary>
+        /// 获取星球设置。
+        /// </summary>
         public PlanetSettings Settings { get; }
+
+        /// <summary>
+        /// 获取图层纹理列表。
+        /// </summary>
+        public List<LayerTexture> Textures { get; }
 
         public Memory<float> GetLayer(string name)
         {

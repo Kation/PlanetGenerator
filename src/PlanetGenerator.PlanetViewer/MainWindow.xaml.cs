@@ -55,6 +55,7 @@ namespace PlanetGenerator.PlanetViewer
             _settings = new PlanetSettings();
             _settings.TileResolution = 128;
             _settings.Seed = 3;
+            _settings.TextureMultiple = 1;
             _game = stride.Game;
             await stride.Run();
             await stride.RunSceneScript(scene =>

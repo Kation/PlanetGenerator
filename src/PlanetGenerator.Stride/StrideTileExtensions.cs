@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Stride.Core.Assets;
 
 namespace PlanetGenerator
 {
@@ -16,7 +17,7 @@ namespace PlanetGenerator
         public static Model GenerateFlatMesh(this Tile tile, GraphicsDevice device)
         {
             var length = tile.Settings.TileResolution;
-            
+
             var points = new List<Vector3>();
             var triangles = new List<int>();
             var normals = new List<Vector3>();
@@ -118,7 +119,7 @@ namespace PlanetGenerator
                     DrawCount = triangles.Count,
                     IndexBuffer = new IndexBufferBinding(indexBuffer, true, triangles.Count),
                     VertexBuffers = new[] { new VertexBufferBinding(pointBuffer,
-                                  VertexPositionTexture.Layout, pointBuffer.ElementCount) }                    
+                                  VertexPositionTexture.Layout, pointBuffer.ElementCount) }
                 }
             };
             var model = new Model();
@@ -129,8 +130,10 @@ namespace PlanetGenerator
         private const float _TileAngleX = 1f / 10f;
         private const float _TileAngleX2 = _TileAngleX * 2f;
         private const float _TileAngleY = 2f / 3f;
-        public static Model GenerateSphereModel(this Tile tile, GraphicsDevice device)
+        public static Model GenerateSphereModel(this Tile tile, GraphicsDevice device, StrideTileSettings? settings = null)
         {
+            if (settings == null)
+                settings = StrideTileSettings.Default;
             var length = tile.Settings.TileResolution;
             var vertexs = new List<VertexPositionNormalTexture>();
             //var points = new List<Vector3>();
@@ -262,17 +265,23 @@ namespace PlanetGenerator
                     var p2 = new Vector3(positionX[a + 1, b] * (tile.Settings.PlanetRadius + t2), positionY[a + 1, b] * (tile.Settings.PlanetRadius + t2), positionZ[a + 1, b] * (tile.Settings.PlanetRadius + t2));
                     var p3 = new Vector3(positionX[a + 1, b + 1] * (tile.Settings.PlanetRadius + t3), positionY[a + 1, b + 1] * (tile.Settings.PlanetRadius + t3), positionZ[a + 1, b + 1] * (tile.Settings.PlanetRadius + t3));
                     var p4 = new Vector3(positionX[a, b + 1] * (tile.Settings.PlanetRadius + t4), positionY[a, b + 1] * (tile.Settings.PlanetRadius + t4), positionZ[a, b + 1] * (tile.Settings.PlanetRadius + t4));
-
                     var p5 = new Vector3(positionXm[a, b] * (tile.Settings.PlanetRadius + h), positionYm[a, b] * (tile.Settings.PlanetRadius + h), positionZm[a, b] * (tile.Settings.PlanetRadius + h));
+
+                    var c1 = new Vector2(a / (length - 1), b / (length - 1));
+                    var c2 = new Vector2((a + 1) / (length - 1), b / (length - 1));
+                    var c3 = new Vector2((a + 1) / (length - 1), (b + 1) / (length - 1));
+                    var c4 = new Vector2(a / (length - 1), (b + 1) / (length - 1));
+                    var c5 = new Vector2((a + 0.5f) / (length - 1), (b + 0.5f) / (length - 1));
+
                     {
                         triangles.Add(i++);
                         triangles.Add(i++);
                         triangles.Add(i++);
                         var normal = Vector3.Cross(p2 - p5, p1 - p5);
                         normal.Normalize();
-                        vertexs.Add(new VertexPositionNormalTexture(p1, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p2, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, new Vector2(0, 0)));
+                        vertexs.Add(new VertexPositionNormalTexture(p1, normal, c1));
+                        vertexs.Add(new VertexPositionNormalTexture(p2, normal, c2));
+                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, c5));
                     }
                     {
                         triangles.Add(i++);
@@ -280,9 +289,9 @@ namespace PlanetGenerator
                         triangles.Add(i++);
                         var normal = Vector3.Cross(p3 - p5, p2 - p5);
                         normal.Normalize();
-                        vertexs.Add(new VertexPositionNormalTexture(p2, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p3, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, new Vector2(0, 0)));
+                        vertexs.Add(new VertexPositionNormalTexture(p2, normal, c2));
+                        vertexs.Add(new VertexPositionNormalTexture(p3, normal, c3));
+                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, c5));
                     }
                     {
                         triangles.Add(i++);
@@ -290,9 +299,9 @@ namespace PlanetGenerator
                         triangles.Add(i++);
                         var normal = Vector3.Cross(p4 - p5, p3 - p5);
                         normal.Normalize();
-                        vertexs.Add(new VertexPositionNormalTexture(p3, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p4, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, new Vector2(0, 0)));
+                        vertexs.Add(new VertexPositionNormalTexture(p3, normal, c3));
+                        vertexs.Add(new VertexPositionNormalTexture(p4, normal, c4));
+                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, c5));
                     }
                     {
                         triangles.Add(i++);
@@ -300,12 +309,13 @@ namespace PlanetGenerator
                         triangles.Add(i++);
                         var normal = Vector3.Cross(p1 - p5, p4 - p5);
                         normal.Normalize();
-                        vertexs.Add(new VertexPositionNormalTexture(p4, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p1, normal, new Vector2(0, 0)));
-                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, new Vector2(0, 0)));
+                        vertexs.Add(new VertexPositionNormalTexture(p4, normal, c4));
+                        vertexs.Add(new VertexPositionNormalTexture(p1, normal, c1));
+                        vertexs.Add(new VertexPositionNormalTexture(p5, normal, c5));
                     }
                 }
             }
+
             var pointBuffer = Stride.Graphics.Buffer.Vertex.New(device, vertexs.ToArray(), GraphicsResourceUsage.Dynamic);
             var indexBuffer = Stride.Graphics.Buffer.Index.New(device, triangles.ToArray());
             var mesh = new Stride.Rendering.Mesh
@@ -320,17 +330,47 @@ namespace PlanetGenerator
                                   VertexPositionNormalTexture.Layout, pointBuffer.ElementCount) }
                 }
             };
-            var material = new MaterialInstance(Material.New(device, new MaterialDescriptor
+            var materialDescriptor = new MaterialDescriptor
             {
                 Attributes =
+                {
+                    DiffuseModel = new MaterialDiffuseLambertModelFeature()
+                },
+                Layers = [],
+                MaterialId = AssetId.New()
+            };
+            if (tile.Textures.Count == 0)
+            {
+                materialDescriptor.Attributes.Diffuse = new MaterialDiffuseMapFeature(new ComputeColor { Value = new Color4(0.75f, 0.75f, 0.75f, 1f) });
+            }
+            else
+            {
+                //new ComputeBinaryColor()
+                IComputeColor? computeColor = null;
+                foreach (var layerTexture in tile.Textures)
+                {
+                    if (settings.TextureColors.TryGetValue(layerTexture.Name, out var color))
                     {
-                        DiffuseModel = new MaterialDiffuseLambertModelFeature(),
-                        Diffuse = new MaterialDiffuseMapFeature(new ComputeColor { Value = new Color4(0.75f, 0.75f, 0.75f, 1f) })
+                        int[] textureData = new int[layerTexture.Size * layerTexture.Size];
+                        for (i = 0; i < layerTexture.TextureData.Length; i++)
+                        {
+                            var iColor = color;
+                            iColor.A *= layerTexture.TextureData.Span[i];
+                            textureData[i] = iColor.ToRgba();
+                        }
+                        var texture = Texture.New2D(device, layerTexture.Size, layerTexture.Size, PixelFormat.R8G8B8A8_UNorm, textureData, TextureFlags.ShaderResource);
+                        var textureColor = new ComputeTextureColor(texture);
+                        if (computeColor == null)
+                            computeColor = textureColor;
+                        else
+                            computeColor = new ComputeBinaryColor(computeColor, textureColor, BinaryOperator.Overlay);
                     }
-            }));
+                }
+                materialDescriptor.Attributes.Diffuse = new MaterialDiffuseMapFeature(new ComputeBinaryColor(new ComputeColor { Value = new Color4(0.75f, 0.75f, 0.75f, 1f) }, computeColor, BinaryOperator.Overlay));
+            }
             var model = new Model();
             model.Meshes.Add(mesh);
-            model.Materials.Add(material);
+            model.Materials.Add(new MaterialInstance(Material.New(device, materialDescriptor)));
             return model;
         }
     }
