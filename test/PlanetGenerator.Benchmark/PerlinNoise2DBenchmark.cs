@@ -29,20 +29,20 @@ namespace PlanetGenerator.Benchmark
                 {
                     var x0 = (x / 40f);
                     var y0 = (y / 40f);
-                    var value = _noise.Get(x0, y0);
-                    data[x, y] = value;
+                    _noise.Get(x0, y0);
+                    data[x, y] = _noise.Get(x0, y0);
                 });
             });
         }
 
-        private void* _px, _py, _pvalues;
+        private float* _px, _py, _pvalues;
         private PerlinNoise _noise;
         [GlobalSetup]
         public unsafe void GlobalSetup()
         {
-            _px = NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
-            _py = NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
-            _pvalues = NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
+            _px = (float*)NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
+            _py = (float*)NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
+            _pvalues = (float*)NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
             var px = new Span<float>(_px, _Length);//new float[_Width * _Height];
             var py = new Span<float>(_py, _Length);//new float[_px.Length];
             for (int x = 0; x < _Width; x++)
@@ -60,9 +60,9 @@ namespace PlanetGenerator.Benchmark
         [Benchmark]
         public void PerlinSIMD()
         {
-            var xm = new NativeMemoryManager((float*)_px, _Length);
-            var ym = new NativeMemoryManager((float*)_px, _Length);
-            var vm = new NativeMemoryManager((float*)_px, _Length);
+            var xm = new NativeMemoryManager(_px, _Length);
+            var ym = new NativeMemoryManager(_px, _Length);
+            var vm = new NativeMemoryManager(_px, _Length);
             _noise.GetRange(xm.Memory, ym.Memory, vm.Memory);
         }
 

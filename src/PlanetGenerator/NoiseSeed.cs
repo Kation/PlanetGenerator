@@ -23,6 +23,7 @@ namespace PlanetGenerator
         private readonly float[] _gradD4z;
         private readonly float[] _gradD4w;
         private readonly int _mask;
+        private readonly Vector<int> _vmask;
 
         public NoiseSeed(int seed) : this(seed, 2) { }
 
@@ -62,6 +63,7 @@ namespace PlanetGenerator
                 _gradD4w[i] = d4.W;
             }
             _mask = length - 1;
+            _vmask = new Vector<int>(_mask);
         }
 
         public float GetGrad(int hash, float offsetX)
@@ -147,18 +149,20 @@ namespace PlanetGenerator
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe int Hash(int value)
+        public int Hash(int value)
         {
             ref int p = ref MemoryMarshal.GetArrayDataReference(_perm);
             return Unsafe.Add(ref p, value & _mask);
         }
 
-        public unsafe Vector<int> Hash(Vector<int> value)
+        public Vector<int> Hash(Vector<int> value)
         {
-            Span<int> p = stackalloc int[Vector<int>.Count];
+            value &= _vmask;
+            ref int p = ref MemoryMarshal.GetArrayDataReference(_perm);
+            Span<int> h = stackalloc int[Vector<int>.Count];
             for (int i = 0; i < Vector<int>.Count; i++)
-                p[i] = Hash(value[i]);
-            return new Vector<int>(p);
+                h[i] = Unsafe.Add(ref p, value[i]);
+            return new Vector<int>(h);
         }
     }
 }

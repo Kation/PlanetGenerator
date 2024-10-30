@@ -98,93 +98,93 @@ namespace PlanetGenerator.Testing
             bitmap.Dispose();
         }
 
-        [Fact]
-        public unsafe void D2SIMD()
-        {
-            int min = 255, max = 0;
-            //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
-            //DefaultPerlinNoise noise = new DefaultPerlinNoise(1);
-            //SIMDPerlinNoise noise = new SIMDPerlinNoise(1);
-            var noise = new SimplexNoise(1);
-            //noise.Get2D(new float[] { 0, 0 });
-            //var v1 = noise.Get(0.5f, 0.5f);
-            //var v3 = noise.Get(0.5f, 0f);
-            //var v2 = noise.Get(new float[] { 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f }, 2);
-            //var v1 = noise.Get(60f / 80f, 5f / 80f);
-            //var v2 = noise.Get(new float[] { 60f / 80f, 5f / 80f }, 2);
-            //noise.Get(0.5f, 0);
-            //noise.Get(0.5f, 0, 0);
-            //noise.Get(120f / 200f, 113f / 200f);
-            //float[,] values = new float[100, 100];
-            Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            var length = bitmap.Width * bitmap.Height;
-            var alignment = (nuint)(sizeof(float) * Vector<float>.Count);
-            var px = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
-            var py = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
-            var pvalues = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
-            var xSpan = new Span<float>(px, length);
-            var ySpan = new Span<float>(py, length);
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    var i = x + y * bitmap.Width;
-                    xSpan[i] = (x / 80f);
-                    ySpan[i] = (y / 80f);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.5f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.25f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.125f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.0625f * noise.Get(x0, y0);
-                    //value /= 2;
-                    //var value = MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.5f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.25f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.125f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.0625f * MathF.Abs(noise.Get(x0, y0));
-                    //value /= 2;
-                }
-            }
-            noise.GetRange(new IntPtr(px), new IntPtr(py), new IntPtr(pvalues), length);
-            var valuesSpan = new Span<float>(pvalues, length);
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    var value = valuesSpan[x + y * bitmap.Width];
-                    int c = (int)((value * 255) + 255) / 2;
-                    if (c < min)
-                        min = c;
-                    if (c > max)
-                        max = c;
-                    if (c > 255 || c < 0)
-                    {
+        //[Fact]
+        //public unsafe void D2SIMD()
+        //{
+        //    int min = 255, max = 0;
+        //    //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
+        //    //DefaultPerlinNoise noise = new DefaultPerlinNoise(1);
+        //    //SIMDPerlinNoise noise = new SIMDPerlinNoise(1);
+        //    var noise = new SimplexNoise(1);
+        //    //noise.Get2D(new float[] { 0, 0 });
+        //    //var v1 = noise.Get(0.5f, 0.5f);
+        //    //var v3 = noise.Get(0.5f, 0f);
+        //    //var v2 = noise.Get(new float[] { 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f }, 2);
+        //    //var v1 = noise.Get(60f / 80f, 5f / 80f);
+        //    //var v2 = noise.Get(new float[] { 60f / 80f, 5f / 80f }, 2);
+        //    //noise.Get(0.5f, 0);
+        //    //noise.Get(0.5f, 0, 0);
+        //    //noise.Get(120f / 200f, 113f / 200f);
+        //    //float[,] values = new float[100, 100];
+        //    Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        //    var length = bitmap.Width * bitmap.Height;
+        //    var alignment = (nuint)(sizeof(float) * Vector<float>.Count);
+        //    var px = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
+        //    var py = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
+        //    var pvalues = NativeMemory.AlignedAlloc((nuint)length * sizeof(float), alignment);
+        //    var xSpan = new Span<float>(px, length);
+        //    var ySpan = new Span<float>(py, length);
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var i = x + y * bitmap.Width;
+        //            xSpan[i] = (x / 80f);
+        //            ySpan[i] = (y / 80f);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.5f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.25f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.125f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.0625f * noise.Get(x0, y0);
+        //            //value /= 2;
+        //            //var value = MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.5f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.25f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.125f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.0625f * MathF.Abs(noise.Get(x0, y0));
+        //            //value /= 2;
+        //        }
+        //    }
+        //    noise.GetRange(new IntPtr(px), new IntPtr(py), new IntPtr(pvalues), length);
+        //    var valuesSpan = new Span<float>(pvalues, length);
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var value = valuesSpan[x + y * bitmap.Width];
+        //            int c = (int)((value * 255) + 255) / 2;
+        //            if (c < min)
+        //                min = c;
+        //            if (c > max)
+        //                max = c;
+        //            if (c > 255 || c < 0)
+        //            {
 
-                    }
-                    bitmap.SetPixel(x, y, Color.FromArgb((255 - c), 0, 0, 0));
-                }
-            }
-            bitmap.Save("d2simd.png", ImageFormat.Png);
-            bitmap.Dispose();
-            NativeMemory.AlignedFree(px);
-            NativeMemory.AlignedFree(py);
-            NativeMemory.AlignedFree(pvalues);
-        }
+        //            }
+        //            bitmap.SetPixel(x, y, Color.FromArgb((255 - c), 0, 0, 0));
+        //        }
+        //    }
+        //    bitmap.Save("d2simd.png", ImageFormat.Png);
+        //    bitmap.Dispose();
+        //    NativeMemory.AlignedFree(px);
+        //    NativeMemory.AlignedFree(py);
+        //    NativeMemory.AlignedFree(pvalues);
+        //}
 
         //[Fact]
         //public void D2OpenCL()
@@ -266,86 +266,86 @@ namespace PlanetGenerator.Testing
         //    bitmap.Dispose();
         //}
 
-        [Fact]
-        public void D2CUDA()
-        {
-            int min = 255, max = 0;
-            //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
-            //DefaultPerlinNoise noise = new DefaultPerlinNoise(1);
-            //SIMDPerlinNoise noise = new SIMDPerlinNoise(1);
-            using var context = Context.Create(builder => builder.Cuda());
-            var noise = new GPUSimplexNoise(1, context, context.GetCudaDevice(0));
-            //noise.Get2D(new float[] { 0, 0 });
-            //var v1 = noise.Get(0.5f, 0.5f);
-            //var v3 = noise.Get(0.5f, 0f);
-            //var v2 = noise.Get(new float[] { 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f }, 2);
-            //var v1 = noise.Get(60f / 80f, 5f / 80f);
-            //var v2 = noise.Get(new float[] { 60f / 80f, 5f / 80f }, 2);
-            //noise.Get(0.5f, 0);
-            //noise.Get(0.5f, 0, 0);
-            //noise.Get(120f / 200f, 113f / 200f);
-            //float[,] values = new float[100, 100];
-            Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            float[] px = new float[bitmap.Width * bitmap.Height];
-            float[] py = new float[px.Length];
-            float[] values = new float[px.Length];
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    var i = x + y * bitmap.Width;
-                    px[i] = (x / 80f);
-                    py[i] = (y / 80f);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.5f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.25f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.125f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.0625f * noise.Get(x0, y0);
-                    //value /= 2;
-                    //var value = MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.5f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.25f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.125f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.0625f * MathF.Abs(noise.Get(x0, y0));
-                    //value /= 2;
-                }
-            }
-            noise.GetRange(px, py, values);
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    var value = values[x + y * bitmap.Width];
-                    int c = (int)((value * 255) + 255) / 2;
-                    if (c < min)
-                        min = c;
-                    if (c > max)
-                        max = c;
-                    if (c > 255 || c < 0)
-                    {
+        //[Fact]
+        //public void D2CUDA()
+        //{
+        //    int min = 255, max = 0;
+        //    //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
+        //    //DefaultPerlinNoise noise = new DefaultPerlinNoise(1);
+        //    //SIMDPerlinNoise noise = new SIMDPerlinNoise(1);
+        //    using var context = Context.Create(builder => builder.Cuda());
+        //    var noise = new GPUSimplexNoise(1, context, context.GetCudaDevice(0));
+        //    //noise.Get2D(new float[] { 0, 0 });
+        //    //var v1 = noise.Get(0.5f, 0.5f);
+        //    //var v3 = noise.Get(0.5f, 0f);
+        //    //var v2 = noise.Get(new float[] { 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f }, 2);
+        //    //var v1 = noise.Get(60f / 80f, 5f / 80f);
+        //    //var v2 = noise.Get(new float[] { 60f / 80f, 5f / 80f }, 2);
+        //    //noise.Get(0.5f, 0);
+        //    //noise.Get(0.5f, 0, 0);
+        //    //noise.Get(120f / 200f, 113f / 200f);
+        //    //float[,] values = new float[100, 100];
+        //    Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        //    float[] px = new float[bitmap.Width * bitmap.Height];
+        //    float[] py = new float[px.Length];
+        //    float[] values = new float[px.Length];
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var i = x + y * bitmap.Width;
+        //            px[i] = (x / 80f);
+        //            py[i] = (y / 80f);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.5f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.25f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.125f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.0625f * noise.Get(x0, y0);
+        //            //value /= 2;
+        //            //var value = MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.5f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.25f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.125f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.0625f * MathF.Abs(noise.Get(x0, y0));
+        //            //value /= 2;
+        //        }
+        //    }
+        //    noise.GetRange(px, py, values);
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var value = values[x + y * bitmap.Width];
+        //            int c = (int)((value * 255) + 255) / 2;
+        //            if (c < min)
+        //                min = c;
+        //            if (c > max)
+        //                max = c;
+        //            if (c > 255 || c < 0)
+        //            {
 
-                    }
-                    bitmap.SetPixel(x, y, Color.FromArgb((255 - c), 0, 0, 0));
-                }
-            }
-            bitmap.Save("d2cuda.png", ImageFormat.Png);
-            bitmap.Dispose();
-        }
+        //            }
+        //            bitmap.SetPixel(x, y, Color.FromArgb((255 - c), 0, 0, 0));
+        //        }
+        //    }
+        //    bitmap.Save("d2cuda.png", ImageFormat.Png);
+        //    bitmap.Dispose();
+        //}
 
         [Fact]
         public void D3()
