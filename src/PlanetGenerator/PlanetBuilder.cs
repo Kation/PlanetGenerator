@@ -8,30 +8,36 @@ namespace PlanetGenerator
 {
     public class PlanetBuilder
     {
-        private const float _TileAngleX = 1f / 10f;
-        private const float _TileAngleX2 = _TileAngleX * 2;
-        private const float _TileAngleY = 2f / 3f;
+        private List<IPlanetLayer> _layers;
+        private IReadOnlyList<IPlanetLayer> _readOnlylayers;
 
         public PlanetBuilder(PlanetSettings planetSettings, INoise noise)
         {
             Settings = planetSettings ?? throw new ArgumentNullException(nameof(planetSettings));
             Noise = noise ?? throw new ArgumentNullException(nameof(noise));
-            Layers = new List<IPlanetLayer>();
-            Layers.Add(new BaseLayer());
+            _layers = [new BaseLayer()];
+            _readOnlylayers = _layers.AsReadOnly();
         }
 
         public PlanetSettings Settings { get; }
 
         public INoise Noise { get; }
 
-        public IList<IPlanetLayer> Layers { get; }
+        public IList<IPlanetLayer> Layers => _layers;
+
+        public void GenerateBase()
+        {
+            var context = new PlanetLayerContext(Noise, Settings, _readOnlylayers);
+            foreach (var layer in Layers)
+                layer.HandleBase(context);
+        }
 
         public Tile GenerateTile(int index, int zoomLevel)
         {
             PlanetHelper.GetLocationAndPositions(index, zoomLevel, Settings.TileResolution, Settings.PlanetRadius, out var positionX, out var positionY, out var positionZ, out var longitudes, out var latitudes);
-            var context = new PlanetLayerContext(positionX, positionY, positionZ, longitudes, latitudes, Noise, Settings);
+            var context = new PlanetLayerTileContext(positionX, positionY, positionZ, longitudes, latitudes, Noise, Settings, _readOnlylayers);
             foreach (var layer in Layers)
-                layer.Handle(context, index, zoomLevel);
+                layer.HandleTile(context, index, zoomLevel);
             var terrain = context.BuildTerrain();
             return new Tile(index, zoomLevel, terrain, Settings, context.Textures);
         }

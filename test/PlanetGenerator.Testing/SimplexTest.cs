@@ -55,8 +55,8 @@ namespace PlanetGenerator.Testing
                     var x0 = (x / 80f);
                     var y0 = (y / 80f);
                     var value = noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
+                    x0 *= 2;
+                    y0 *= 2;
                     //value += 0.5f * noise.Get(x0, y0);
                     //x0 *= 2;
                     //y0 *= 2;
@@ -186,85 +186,85 @@ namespace PlanetGenerator.Testing
             NativeMemory.AlignedFree(pvalues);
         }
 
-        [Fact]
-        public void D2OpenCL()
-        {
-            int min = 255, max = 0;
-            //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
-            //DefaultPerlinNoise noise = new DefaultPerlinNoise(1);
-            //SIMDPerlinNoise noise = new SIMDPerlinNoise(1);
-            using var context = Context.Create(builder => builder.OpenCL());
-            var noise = new GPUSimplexNoise(1, context, context.GetCLDevice(0));
-            //noise.Get2D(new float[] { 0, 0 });
-            //var v1 = noise.Get(0.5f, 0.5f);
-            //var v3 = noise.Get(0.5f, 0f);
-            //var v2 = noise.Get(new float[] { 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f }, 2);
-            //var v1 = noise.Get(60f / 80f, 5f / 80f);
-            //var v2 = noise.Get(new float[] { 60f / 80f, 5f / 80f }, 2);
-            //noise.Get(0.5f, 0);
-            //noise.Get(0.5f, 0, 0);
-            //noise.Get(120f / 200f, 113f / 200f);
-            //float[,] values = new float[100, 100];
-            Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            float[] px = new float[bitmap.Width * bitmap.Height];
-            float[] py = new float[px.Length];
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    var i = x + y * bitmap.Width;
-                    px[i] = (x / 80f);
-                    py[i] = (y / 80f);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.5f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.25f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.125f * noise.Get(x0, y0);
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.0625f * noise.Get(x0, y0);
-                    //value /= 2;
-                    //var value = MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.5f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.25f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.125f * MathF.Abs(noise.Get(x0, y0));
-                    //x0 *= 2;
-                    //y0 *= 2;
-                    //value += 0.0625f * MathF.Abs(noise.Get(x0, y0));
-                    //value /= 2;
-                }
-            }
-            var values = noise.GetRange(px, py);
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    var value = values[x + y * bitmap.Width];
-                    int c = (int)((value * 255) + 255) / 2;
-                    if (c < min)
-                        min = c;
-                    if (c > max)
-                        max = c;
-                    if (c > 255 || c < 0)
-                    {
+        //[Fact]
+        //public void D2OpenCL()
+        //{
+        //    int min = 255, max = 0;
+        //    //DefaultPerlinNoise noise = new DefaultPerlinNoise(perm);
+        //    //DefaultPerlinNoise noise = new DefaultPerlinNoise(1);
+        //    //SIMDPerlinNoise noise = new SIMDPerlinNoise(1);
+        //    using var context = Context.Create(builder => builder.OpenCL());
+        //    var noise = new GPUSimplexNoise(1, context, context.GetCLDevice(0));
+        //    //noise.Get2D(new float[] { 0, 0 });
+        //    //var v1 = noise.Get(0.5f, 0.5f);
+        //    //var v3 = noise.Get(0.5f, 0f);
+        //    //var v2 = noise.Get(new float[] { 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f, 0.5f, 0.5f, 0.5f, 0f }, 2);
+        //    //var v1 = noise.Get(60f / 80f, 5f / 80f);
+        //    //var v2 = noise.Get(new float[] { 60f / 80f, 5f / 80f }, 2);
+        //    //noise.Get(0.5f, 0);
+        //    //noise.Get(0.5f, 0, 0);
+        //    //noise.Get(120f / 200f, 113f / 200f);
+        //    //float[,] values = new float[100, 100];
+        //    Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        //    float[] px = new float[bitmap.Width * bitmap.Height];
+        //    float[] py = new float[px.Length];
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var i = x + y * bitmap.Width;
+        //            px[i] = (x / 80f);
+        //            py[i] = (y / 80f);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.5f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.25f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.125f * noise.Get(x0, y0);
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.0625f * noise.Get(x0, y0);
+        //            //value /= 2;
+        //            //var value = MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.5f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.25f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.125f * MathF.Abs(noise.Get(x0, y0));
+        //            //x0 *= 2;
+        //            //y0 *= 2;
+        //            //value += 0.0625f * MathF.Abs(noise.Get(x0, y0));
+        //            //value /= 2;
+        //        }
+        //    }
+        //    var values = noise.GetRange(px, py);
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var value = values[x + y * bitmap.Width];
+        //            int c = (int)((value * 255) + 255) / 2;
+        //            if (c < min)
+        //                min = c;
+        //            if (c > max)
+        //                max = c;
+        //            if (c > 255 || c < 0)
+        //            {
 
-                    }
-                    bitmap.SetPixel(x, y, Color.FromArgb((255 - c), 0, 0, 0));
-                }
-            }
-            bitmap.Save("d2opencl.png", ImageFormat.Png);
-            bitmap.Dispose();
-        }
+        //            }
+        //            bitmap.SetPixel(x, y, Color.FromArgb((255 - c), 0, 0, 0));
+        //        }
+        //    }
+        //    bitmap.Save("d2opencl.png", ImageFormat.Png);
+        //    bitmap.Dispose();
+        //}
 
         [Fact]
         public void D2CUDA()
@@ -288,6 +288,7 @@ namespace PlanetGenerator.Testing
             Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             float[] px = new float[bitmap.Width * bitmap.Height];
             float[] py = new float[px.Length];
+            float[] values = new float[px.Length];
             for (int x = 0; x < bitmap.Width; x++)
             {
                 for (int y = 0; y < bitmap.Height; y++)
@@ -324,7 +325,7 @@ namespace PlanetGenerator.Testing
                     //value /= 2;
                 }
             }
-            var values = noise.GetRange(px, py);
+            noise.GetRange(px, py, values);
             for (int x = 0; x < bitmap.Width; x++)
             {
                 for (int y = 0; y < bitmap.Height; y++)
@@ -424,6 +425,7 @@ namespace PlanetGenerator.Testing
             float[] px = new float[bitmap.Width * bitmap.Height];
             float[] py = new float[px.Length];
             float[] pz = new float[px.Length];
+            float[] values = new float[px.Length];
             Array.Fill(pz, 0.5f);
             for (int x = 0; x < bitmap.Width; x++)
             {
@@ -461,7 +463,7 @@ namespace PlanetGenerator.Testing
                     //value /= 2;
                 }
             }
-            var values = noise.GetRange(px, py, pz);
+            noise.GetRange(px, py, pz, values);
             for (int x = 0; x < bitmap.Width; x++)
             {
                 for (int y = 0; y < bitmap.Height; y++)

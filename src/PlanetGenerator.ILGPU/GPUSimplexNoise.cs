@@ -24,13 +24,13 @@ namespace PlanetGenerator
 
         }
 
-        public GPUSimplexNoise(byte[] seeds, Context context, Device device) : base(seeds)
-        {
-            _context = context;
-            _device = device;
-            _accelerator = device.CreateAccelerator(context);
-            _permFloatBuffer = _accelerator.Allocate1D(GetPermFloat());
-        }
+        //public GPUSimplexNoise(byte[] seeds, Context context, Device device) : base(seeds)
+        //{
+        //    _context = context;
+        //    _device = device;
+        //    _accelerator = device.CreateAccelerator(context);
+        //    _permFloatBuffer = _accelerator.Allocate1D(GetPermFloat());
+        //}
 
         public void Dispose()
         {

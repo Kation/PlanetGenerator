@@ -64,7 +64,6 @@ namespace PlanetGenerator.Benchmark
         public void SimplexParallel()
         {
             var noise = new SimplexNoise(1);
-            float[,,,] data = new float[_Width, _Height, _Length, _W];
             Parallel.For(0, _Width, x =>
             {
                 var x0 = (x / 40f);
@@ -78,14 +77,14 @@ namespace PlanetGenerator.Benchmark
                         {
                             var w0 = (w / 40f);
                             var value = noise.Get(x0, y0, z0, w0);
-                            data[x, y, z, w] = value;
+                            _values[x + y * _Width + z * _Width * _Height + w * _Width * _Height * _Length] = value;
                         });
                     });
                 });
             });
         }
 
-        private float[] _px, _py, _pz, _pw;
+        private float[] _px, _py, _pz, _pw, _values;
         [GlobalSetup]
         public void GlobalSetup()
         {
@@ -93,6 +92,7 @@ namespace PlanetGenerator.Benchmark
             _py = new float[_px.Length];
             _pz = new float[_px.Length];
             _pw = new float[_px.Length];
+            _values = new float[_px.Length];
             Parallel.For(0, _Width, x =>
             {
                 Parallel.For(0, _Height, y =>
@@ -116,7 +116,7 @@ namespace PlanetGenerator.Benchmark
         public void SimplexSIMD()
         {
             var noise = new SimplexNoise(1);
-            var values = noise.GetRange(_px, _py, _pz, _pw);
+            noise.GetRange(_px, _py, _pz, _pw, _values);
         }
     }
 }

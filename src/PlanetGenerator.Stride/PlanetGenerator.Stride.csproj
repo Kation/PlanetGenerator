@@ -8,6 +8,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="SkiaSharp" Version="3.0.0-preview.5.4" />
 		<PackageReference Include="Stride.Engine" Version="4.2.0.2232" />
 	</ItemGroup>
 

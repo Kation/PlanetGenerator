@@ -6,26 +6,22 @@ namespace PlanetGenerator
 {
     public interface INoise
     {
-        float Get(params float[] position);
+        INoiseSeed Seed { get; }
 
-        float Get(float x);
+        float Get(float x, int cellOffsetX = 0);
 
-        float Get(float x, float y);
+        float Get(float x, float y, int cellOffsetX = 0, int cellOffsetY = 0);
 
-        float Get(float x, float y, float z);
+        float Get(float x, float y, float z, int cellOffsetX = 0, int cellOffsetY = 0, int cellOffsetZ = 0);
 
-        float Get(float x, float y, float z, float w);
+        float Get(float x, float y, float z, float w, int cellOffsetX = 0, int cellOffsetY = 0, int cellOffsetZ = 0, int cellOffsetW = 0);
 
-        float[] GetRange(params float[][] positions);
+        void GetRange(Memory<float> x, Memory<float> values, int cellOffsetX = 0, bool aligned = false);
 
-        float[] GetRange(float[] x);
+        void GetRange(Memory<float> x, Memory<float> y, Memory<float> values, int cellOffsetX = 0, int cellOffsetY = 0, bool aligned = false);
 
-        void GetRange(IntPtr x, IntPtr y, IntPtr values, int length);
+        void GetRange(Memory<float> x, Memory<float> y, Memory<float> z, Memory<float> values, int cellOffsetX = 0, int cellOffsetY = 0, int cellOffsetZ = 0, bool aligned = false);
 
-        float[] GetRange(float[] x, float[] y, float[] z);
-
-        float[] GetRange(float[] x, float[] y, float[] z, float[] w);
-
-        float GetHashFloat(int x);
+        void GetRange(Memory<float> x, Memory<float> y, Memory<float> z, Memory<float> w, Memory<float> values, int cellOffsetX = 0, int cellOffsetY = 0, int cellOffsetZ = 0, int cellOffsetW = 0, bool aligned = false);
     }
 }

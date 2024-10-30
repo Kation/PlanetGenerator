@@ -6,6 +6,8 @@ namespace PlanetGenerator
 {
     public interface IPlanetLayer
     {
-        void Handle(PlanetLayerContext context, int index, int zoomLevel);
+        void HandleBase(PlanetLayerContext context);
+
+        void HandleTile(PlanetLayerTileContext context, int index, int zoomLevel);
     }
 }

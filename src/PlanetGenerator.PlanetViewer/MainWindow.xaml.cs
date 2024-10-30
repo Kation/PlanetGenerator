@@ -132,6 +132,7 @@ namespace PlanetGenerator.PlanetViewer
                 scene.Entities.Add(ground);
             });
             PlanetBuilder generator = new PlanetBuilder(_settings, new SimplexNoise(3));
+            generator.GenerateBase();
             {
                 var tile = generator.GenerateTile(0, 0);
                 await stride.RunSceneScript(scene =>

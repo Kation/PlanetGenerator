@@ -3,6 +3,7 @@ using ILGPU;
 using ILGPU.Runtime.Cuda;
 using ILGPU.Runtime.OpenCL;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -13,12 +14,13 @@ using System.Threading.Tasks;
 namespace PlanetGenerator.Benchmark
 {
     //[SimpleJob]
-    public unsafe class Noise2DBenchmark
+    public unsafe class PerlinNoise2DBenchmark
     {
         private const int _Width = 8192, _Height = 8192;
+        private const int _Length = _Width * _Height;
 
         [Benchmark(Baseline = true)]
-        public void SimplexParallel()
+        public void PerlinParallel()
         {
             float[,] data = new float[_Width, _Height];
             Parallel.For(0, _Width, x =>
@@ -34,15 +36,15 @@ namespace PlanetGenerator.Benchmark
         }
 
         private void* _px, _py, _pvalues;
-        private SimplexNoise _noise;
+        private PerlinNoise _noise;
         [GlobalSetup]
         public unsafe void GlobalSetup()
         {
-            _px = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
-            _py = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
-            _pvalues = NativeMemory.AlignedAlloc(_Width * _Height * sizeof(float), (nuint)sizeof(Vector<float>));
-            var px = new Span<float>(_px, _Width * _Height);//new float[_Width * _Height];
-            var py = new Span<float>(_py, _Width * _Height);//new float[_px.Length];
+            _px = NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
+            _py = NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
+            _pvalues = NativeMemory.AlignedAlloc(_Length * sizeof(float), (nuint)sizeof(Vector<float>));
+            var px = new Span<float>(_px, _Length);//new float[_Width * _Height];
+            var py = new Span<float>(_py, _Length);//new float[_px.Length];
             for (int x = 0; x < _Width; x++)
             {
                 for (int y = 0; y < _Height; y++)
@@ -52,13 +54,16 @@ namespace PlanetGenerator.Benchmark
                     py[i] = (y / 40f);
                 }
             }
-            _noise = new SimplexNoise(1);
+            _noise = new PerlinNoise(1);
         }
 
         [Benchmark]
-        public void SimplexSIMD()
+        public void PerlinSIMD()
         {
-            _noise.GetRange(new IntPtr(_px), new IntPtr(_py), new IntPtr(_pvalues), _Width * _Height);
+            var xm = new NativeMemoryManager((float*)_px, _Length);
+            var ym = new NativeMemoryManager((float*)_px, _Length);
+            var vm = new NativeMemoryManager((float*)_px, _Length);
+            _noise.GetRange(xm.Memory, ym.Memory, vm.Memory);
         }
 
         //[Benchmark]
@@ -77,5 +82,37 @@ namespace PlanetGenerator.Benchmark
         //    var values = noise.GetRange(_px, _py);
         //    noise.Dispose();
         //}
+
+        private class NativeMemoryManager : MemoryManager<float>
+        {
+            private readonly float* _p;
+            private readonly int _length;
+
+            public NativeMemoryManager(float* p, int length)
+            {
+                _p = p;
+                _length = length;
+            }
+
+            public override Span<float> GetSpan()
+            {
+                return new Span<float>(_p, _length);
+            }
+
+            public override MemoryHandle Pin(int elementIndex = 0)
+            {
+                return new MemoryHandle(_p + elementIndex);
+            }
+
+            public override void Unpin()
+            {
+
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+
+            }
+        }
     }
 }

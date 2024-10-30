@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Stride.Core.Assets;
+using System.Runtime.InteropServices;
 
 namespace PlanetGenerator
 {
@@ -267,11 +268,11 @@ namespace PlanetGenerator
                     var p4 = new Vector3(positionX[a, b + 1] * (tile.Settings.PlanetRadius + t4), positionY[a, b + 1] * (tile.Settings.PlanetRadius + t4), positionZ[a, b + 1] * (tile.Settings.PlanetRadius + t4));
                     var p5 = new Vector3(positionXm[a, b] * (tile.Settings.PlanetRadius + h), positionYm[a, b] * (tile.Settings.PlanetRadius + h), positionZm[a, b] * (tile.Settings.PlanetRadius + h));
 
-                    var c1 = new Vector2(a / (length - 1), b / (length - 1));
-                    var c2 = new Vector2((a + 1) / (length - 1), b / (length - 1));
-                    var c3 = new Vector2((a + 1) / (length - 1), (b + 1) / (length - 1));
-                    var c4 = new Vector2(a / (length - 1), (b + 1) / (length - 1));
-                    var c5 = new Vector2((a + 0.5f) / (length - 1), (b + 0.5f) / (length - 1));
+                    var c1 = new Vector2(a / (length - 1f), b / (length - 1f));
+                    var c2 = new Vector2((a + 1) / (length - 1f), b / (length - 1f));
+                    var c3 = new Vector2((a + 1) / (length - 1f), (b + 1) / (length - 1f));
+                    var c4 = new Vector2(a / (length - 1f), (b + 1) / (length - 1f));
+                    var c5 = new Vector2((a + 0.5f) / (length - 1f), (b + 0.5f) / (length - 1f));
 
                     {
                         triangles.Add(i++);
@@ -355,7 +356,10 @@ namespace PlanetGenerator
                         for (i = 0; i < layerTexture.TextureData.Length; i++)
                         {
                             var iColor = color;
-                            iColor.A *= layerTexture.TextureData.Span[i];
+                            if (layerTexture.TextureData.Span[i] == 0)
+                                iColor = new Color4(0, 0, 0, 0);
+                            else
+                                iColor.A *= layerTexture.TextureData.Span[i];
                             textureData[i] = iColor.ToRgba();
                         }
                         var texture = Texture.New2D(device, layerTexture.Size, layerTexture.Size, PixelFormat.R8G8B8A8_UNorm, textureData, TextureFlags.ShaderResource);
