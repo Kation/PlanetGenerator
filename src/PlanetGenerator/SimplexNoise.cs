@@ -29,20 +29,12 @@ namespace PlanetGenerator
             }
         }
 
-        private byte[] _perm;
-        private float[] _permFloat;
         private INoiseSeed _seed;
 
         public SimplexNoise(int seed) : this(new NoiseSeed(seed)) { }
 
         public SimplexNoise(INoiseSeed seed)
         {
-            _perm = new byte[256];
-            Random r = new Random(0);
-            r.NextBytes(_perm);
-            _permFloat = new float[256];
-            for (int i = 0; i < 256; i++)
-                _permFloat[i] = (_perm[i] / 255f - 0.5f) * 2f;
             _seed = seed;
         }
 
@@ -68,13 +60,14 @@ namespace PlanetGenerator
         public float Get(float x, float y, int cellOffsetX = 0, int cellOffsetY = 0)
         {
             float sum = x + y;
+            //const float skewToCellOrigin = 0.3660254f, skewFromCell = 0.211324871f, sample = 70.14806f;
             float skewToCell, skewFromCell, sample;
-            skewToCell = SkewValue<float[,]>.SkewToCell;
-            skewFromCell = SkewValue<float[,]>.SkewFromCell;
-            sample = SkewValue<float[,]>.Sample;
+            skewToCell = SkewValue<float[,]>.SkewToCell; //0.3660254
+            skewFromCell = SkewValue<float[,]>.SkewFromCell; //0.211324871
+            sample = SkewValue<float[,]>.Sample; //70.14806
             float skewFromOrigin = skewFromCell;
             //变形至单元格的差值
-            skewToCell *= sum;
+            skewToCell = skewToCell * sum;
             //单元格原点总和
             var cellPositionX = x + skewToCell;
             var cellPositionY = y + skewToCell;

@@ -60,9 +60,9 @@ namespace PlanetGenerator.Benchmark
         public void SimplexSIMD()
         {
             var xm = new NativeMemoryManager(_px, _Length);
-            var ym = new NativeMemoryManager(_px, _Length);
-            var vm = new NativeMemoryManager(_px, _Length);
-            _noise.GetRange(xm.Memory, ym.Memory, vm.Memory);
+            var ym = new NativeMemoryManager(_py, _Length);
+            var vm = new NativeMemoryManager(_pvalues, _Length);
+            _noise.GetRange(xm.Memory, ym.Memory, vm.Memory, aligned: true);
         }
 
         //[Benchmark]

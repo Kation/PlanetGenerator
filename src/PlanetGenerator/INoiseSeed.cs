@@ -11,15 +11,15 @@ namespace PlanetGenerator
     {
         int Hash(int value);
 
+        Vector<int> Hash(Vector<int> value);
+
         float GetGrad(int hash, float offsetX);
-        
+
         float GetGrad(int hash, float offsetX, float offsetY);
 
         float GetGrad(int hash, float offsetX, float offsetY, float offsetZ);
 
         float GetGrad(int hash, float offsetX, float offsetY, float offsetZ, float offsetW);
-
-        Vector<int> Hash(Vector<int> value);
 
         Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX);
 
@@ -28,5 +28,14 @@ namespace PlanetGenerator
         Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ);
 
         Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ, Vector<float> offsetW);
+
+
+        //float GetHashGrad(int x, float offsetX);
+
+        float GetHashGrad(int x, int y, float offsetX, float offsetY);
+
+        //float GetHashGrad(int x, int y, int w, float offsetX, float offsetY, float offsetW);
+
+        Vector<float> GetHashGrad(Vector<int> x, Vector<int> y, Vector<float> offsetX, Vector<float> offsetY);
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PlanetGenerator
 {
-    public class NoiseSeed : INoiseSeed
+    public sealed class NoiseSeed : INoiseSeed
     {
         private readonly int[] _perm;
         private readonly float[] _gradD1;
@@ -146,6 +146,16 @@ namespace PlanetGenerator
                 gw[i] = Unsafe.Add(ref pw, hash[i]);
             }
             return new Vector<float>(gx) * offsetX + new Vector<float>(gy) * offsetY + new Vector<float>(gz) * offsetZ + new Vector<float>(gw) * offsetW;
+        }
+
+        public float GetHashGrad(int x, int y, float offsetX, float offsetY)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Vector<float> GetHashGrad(Vector<int> x, Vector<int> y, Vector<float> offsetX, Vector<float> offsetY)
+        {
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
