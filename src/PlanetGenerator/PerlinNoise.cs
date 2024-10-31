@@ -56,11 +56,8 @@ namespace PlanetGenerator
             float ox2 = ox1 - 1f;
             cellX += cellOffsetX;
 
-            var hx1 = _seed.Hash(cellX);
-            var hx2 = _seed.Hash(cellX + 1);
-
-            var gx1 = _seed.GetGrad(hx1, ox1);
-            var gx2 = _seed.GetGrad(hx2, ox2);
+            var gx1 = _seed.GetGrad(cellX, ox1);
+            var gx2 = _seed.GetGrad(cellX + 1, ox2);
 
             return Lerp(gx1, gx2, Fade(ox1));
         }
@@ -76,23 +73,10 @@ namespace PlanetGenerator
             cellX += cellOffsetX;
             cellY += cellOffsetY;
 
-            //var hx1 = _seed.Hash(cellX);
-            //var hx2 = _seed.Hash(cellX + 1);
-
-            //var hx1y1 = _seed.Hash(hx1 + cellY);
-            //var hx2y1 = _seed.Hash(hx2 + cellY);
-            //var hx1y2 = _seed.Hash(hx1 + cellY + 1);
-            //var hx2y2 = _seed.Hash(hx2 + cellY + 1);
-
-            //var gx1y1 = _seed.GetGrad(hx1y1, ox1, oy1);
-            //var gx2y1 = _seed.GetGrad(hx2y1, ox2, oy1);
-            //var gx1y2 = _seed.GetGrad(hx1y2, ox1, oy2);
-            //var gx2y2 = _seed.GetGrad(hx2y2, ox2, oy2);
-
-            var gx1y1 = _seed.GetHashGrad(cellX, cellY, ox1, oy1);
-            var gx2y1 = _seed.GetHashGrad(cellX + 1, cellY, ox2, oy1);
-            var gx1y2 = _seed.GetHashGrad(cellX, cellY + 1, ox1, oy2);
-            var gx2y2 = _seed.GetHashGrad(cellX + 1, cellY + 1, ox2, oy2);
+            var gx1y1 = _seed.GetGrad(cellX, cellY, ox1, oy1);
+            var gx2y1 = _seed.GetGrad(cellX + 1, cellY, ox2, oy1);
+            var gx1y2 = _seed.GetGrad(cellX, cellY + 1, ox1, oy2);
+            var gx2y2 = _seed.GetGrad(cellX + 1, cellY + 1, ox2, oy2);
 
             var fx = Fade(ox1);
 
@@ -116,31 +100,14 @@ namespace PlanetGenerator
             cellY += cellOffsetY;
             cellZ += cellOffsetZ;
 
-            var hx1 = _seed.Hash(cellX);
-            var hx2 = _seed.Hash(cellX + 1);
-
-            var hx1y1 = _seed.Hash(hx1 + cellY);
-            var hx2y1 = _seed.Hash(hx2 + cellY);
-            var hx1y2 = _seed.Hash(hx1 + cellY + 1);
-            var hx2y2 = _seed.Hash(hx2 + cellY + 1);
-
-            var hx1y1z1 = _seed.Hash(hx1y1 + cellZ);
-            var hx2y1z1 = _seed.Hash(hx2y1 + cellZ);
-            var hx1y2z1 = _seed.Hash(hx1y2 + cellZ);
-            var hx2y2z1 = _seed.Hash(hx2y2 + cellZ);
-            var hx1y1z2 = _seed.Hash(hx1y1 + cellZ + 1);
-            var hx2y1z2 = _seed.Hash(hx2y1 + cellZ + 1);
-            var hx1y2z2 = _seed.Hash(hx1y2 + cellZ + 1);
-            var hx2y2z2 = _seed.Hash(hx2y2 + cellZ + 1);
-
-            var gx1y1z1 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz1);
-            var gx2y1z1 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz1);
-            var gx1y2z1 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz1);
-            var gx2y2z1 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz1);
-            var gx1y1z2 = _seed.GetGrad(hx1y1z2, ox1, oy1, oz2);
-            var gx2y1z2 = _seed.GetGrad(hx2y1z2, ox2, oy1, oz2);
-            var gx1y2z2 = _seed.GetGrad(hx1y2z2, ox1, oy2, oz2);
-            var gx2y2z2 = _seed.GetGrad(hx2y2z2, ox2, oy2, oz2);
+            var gx1y1z1 = _seed.GetGrad(cellX, cellY, cellZ, ox1, oy1, oz1);
+            var gx2y1z1 = _seed.GetGrad(cellX + 1, cellY, cellZ, ox2, oy1, oz1);
+            var gx1y2z1 = _seed.GetGrad(cellX, cellY + 1, cellZ, ox1, oy2, oz1);
+            var gx2y2z1 = _seed.GetGrad(cellX + 1, cellY + 1, cellZ, ox2, oy2, oz1);
+            var gx1y1z2 = _seed.GetGrad(cellX, cellY, cellZ + 1, ox1, oy1, oz2);
+            var gx2y1z2 = _seed.GetGrad(cellX + 1, cellY, cellZ + 1, ox2, oy1, oz2);
+            var gx1y2z2 = _seed.GetGrad(cellX, cellY + 1, cellZ + 1, ox1, oy2, oz2);
+            var gx2y2z2 = _seed.GetGrad(cellX + 1, cellY + 1, cellZ + 1, ox2, oy2, oz2);
 
             var fx = Fade(ox1);
             var fy = Fade(oy1);
@@ -175,56 +142,22 @@ namespace PlanetGenerator
             cellZ += cellOffsetZ;
             cellW += cellOffsetW;
 
-            var hx1 = _seed.Hash(cellX);
-            var hx2 = _seed.Hash(cellX + 1);
-
-            var hx1y1 = _seed.Hash(hx1 + cellY);
-            var hx2y1 = _seed.Hash(hx2 + cellY);
-            var hx1y2 = _seed.Hash(hx1 + cellY + 1);
-            var hx2y2 = _seed.Hash(hx2 + cellY + 1);
-
-            var hx1y1z1 = _seed.Hash(hx1y1 + cellZ);
-            var hx2y1z1 = _seed.Hash(hx2y1 + cellZ);
-            var hx1y2z1 = _seed.Hash(hx1y2 + cellZ);
-            var hx2y2z1 = _seed.Hash(hx2y2 + cellZ);
-            var hx1y1z2 = _seed.Hash(hx1y1 + cellZ + 1);
-            var hx2y1z2 = _seed.Hash(hx2y1 + cellZ + 1);
-            var hx1y2z2 = _seed.Hash(hx1y2 + cellZ + 1);
-            var hx2y2z2 = _seed.Hash(hx2y2 + cellZ + 1);
-
-            var hx1y1z1w1 = _seed.Hash(hx1y1z1 + cellW);
-            var hx2y1z1w1 = _seed.Hash(hx2y1z1 + cellW);
-            var hx1y2z1w1 = _seed.Hash(hx1y2z1 + cellW);
-            var hx2y2z1w1 = _seed.Hash(hx2y2z1 + cellW);
-            var hx1y1z2w1 = _seed.Hash(hx1y1z2 + cellW);
-            var hx2y1z2w1 = _seed.Hash(hx2y1z2 + cellW);
-            var hx1y2z2w1 = _seed.Hash(hx1y2z2 + cellW);
-            var hx2y2z2w1 = _seed.Hash(hx2y2z2 + cellW);
-            var hx1y1z1w2 = _seed.Hash(hx1y1z1 + cellW + 1);
-            var hx2y1z1w2 = _seed.Hash(hx2y1z1 + cellW + 1);
-            var hx1y2z1w2 = _seed.Hash(hx1y2z1 + cellW + 1);
-            var hx2y2z1w2 = _seed.Hash(hx2y2z1 + cellW + 1);
-            var hx1y1z2w2 = _seed.Hash(hx1y1z2 + cellW + 1);
-            var hx2y1z2w2 = _seed.Hash(hx2y1z2 + cellW + 1);
-            var hx1y2z2w2 = _seed.Hash(hx1y2z2 + cellW + 1);
-            var hx2y2z2w2 = _seed.Hash(hx2y2z2 + cellW + 1);
-
-            var gx1y1z1w1 = _seed.GetGrad(hx1y1z1w1, ox1, oy1, oz1, ow1);
-            var gx2y1z1w1 = _seed.GetGrad(hx2y1z1w1, ox2, oy1, oz1, ow1);
-            var gx1y2z1w1 = _seed.GetGrad(hx1y2z1w1, ox1, oy2, oz1, ow1);
-            var gx2y2z1w1 = _seed.GetGrad(hx2y2z1w1, ox2, oy2, oz1, ow1);
-            var gx1y1z2w1 = _seed.GetGrad(hx1y1z2w1, ox1, oy1, oz2, ow1);
-            var gx2y1z2w1 = _seed.GetGrad(hx2y1z2w1, ox2, oy1, oz2, ow1);
-            var gx1y2z2w1 = _seed.GetGrad(hx1y2z2w1, ox1, oy2, oz2, ow1);
-            var gx2y2z2w1 = _seed.GetGrad(hx2y2z2w1, ox2, oy2, oz2, ow1);
-            var gx1y1z1w2 = _seed.GetGrad(hx1y1z1w2, ox1, oy1, oz1, ow2);
-            var gx2y1z1w2 = _seed.GetGrad(hx2y1z1w2, ox2, oy1, oz1, ow2);
-            var gx1y2z1w2 = _seed.GetGrad(hx1y2z1w2, ox1, oy2, oz1, ow2);
-            var gx2y2z1w2 = _seed.GetGrad(hx2y2z1w2, ox2, oy2, oz1, ow2);
-            var gx1y1z2w2 = _seed.GetGrad(hx1y1z2w2, ox1, oy1, oz2, ow2);
-            var gx2y1z2w2 = _seed.GetGrad(hx2y1z2w2, ox2, oy1, oz2, ow2);
-            var gx1y2z2w2 = _seed.GetGrad(hx1y2z2w2, ox1, oy2, oz2, ow2);
-            var gx2y2z2w2 = _seed.GetGrad(hx2y2z2w2, ox2, oy2, oz2, ow2);
+            var gx1y1z1w1 = _seed.GetGrad(cellX, cellY, cellZ, cellW, ox1, oy1, oz1, ow1);
+            var gx2y1z1w1 = _seed.GetGrad(cellX + 1, cellY, cellZ, cellW, ox2, oy1, oz1, ow1);
+            var gx1y2z1w1 = _seed.GetGrad(cellX, cellY + 1, cellZ, cellW, ox1, oy2, oz1, ow1);
+            var gx2y2z1w1 = _seed.GetGrad(cellX + 1, cellY + 1, cellZ, cellW, ox2, oy2, oz1, ow1);
+            var gx1y1z2w1 = _seed.GetGrad(cellX, cellY, cellZ + 1, cellW, ox1, oy1, oz2, ow1);
+            var gx2y1z2w1 = _seed.GetGrad(cellX + 1, cellY, cellZ + 1, cellW, ox2, oy1, oz2, ow1);
+            var gx1y2z2w1 = _seed.GetGrad(cellX, cellY + 1, cellZ + 1, cellW, ox1, oy2, oz2, ow1);
+            var gx2y2z2w1 = _seed.GetGrad(cellX + 1, cellY + 1, cellZ + 1, cellW, ox2, oy2, oz2, ow1);
+            var gx1y1z1w2 = _seed.GetGrad(cellX, cellY, cellZ, cellW + 1, ox1, oy1, oz1, ow2);
+            var gx2y1z1w2 = _seed.GetGrad(cellX + 1, cellY, cellZ, cellW + 1, ox2, oy1, oz1, ow2);
+            var gx1y2z1w2 = _seed.GetGrad(cellX, cellY + 1, cellZ, cellW + 1, ox1, oy2, oz1, ow2);
+            var gx2y2z1w2 = _seed.GetGrad(cellX + 1, cellY + 1, cellZ, cellW + 1, ox2, oy2, oz1, ow2);
+            var gx1y1z2w2 = _seed.GetGrad(cellX, cellY, cellZ + 1, cellW + 1, ox1, oy1, oz2, ow2);
+            var gx2y1z2w2 = _seed.GetGrad(cellX + 1, cellY, cellZ + 1, cellW + 1, ox2, oy1, oz2, ow2);
+            var gx1y2z2w2 = _seed.GetGrad(cellX, cellY + 1, cellZ + 1, cellW + 1, ox1, oy2, oz2, ow2);
+            var gx2y2z2w2 = _seed.GetGrad(cellX + 1, cellY + 1, cellZ + 1, cellW + 1, ox2, oy2, oz2, ow2);
 
             var fx = Fade(ox1);
             var fy = Fade(oy1);
@@ -276,11 +209,8 @@ namespace PlanetGenerator
                     Vector<float> ox1 = vx - floorX;
                     Vector<float> ox2 = ox1 - Vector<float>.One;
 
-                    var hx1 = _seed.Hash(cellX);
-                    var hx2 = _seed.Hash(cellX + Vector<int>.One);
-
-                    var gx1 = _seed.GetGrad(hx1, ox1);
-                    var gx2 = _seed.GetGrad(hx2, ox2);
+                    var gx1 = _seed.GetGrad(cellX, ox1);
+                    var gx2 = _seed.GetGrad(cellX + Vector<int>.One, ox2);
 
                     if (aligned)
                         Vector.StoreAlignedNonTemporal(Lerp(gx1, gx2, Fade(ox1)), (float*)pv.Pointer + index);
@@ -328,23 +258,10 @@ namespace PlanetGenerator
                     Vector<float> oy1 = vy - floorY;
                     Vector<float> oy2 = oy1 - Vector<float>.One;
 
-                    //Vector<int> hx1 = _seed.Hash(cellX);
-                    //Vector<int> hx2 = _seed.Hash(cellX + Vector<int>.One);
-
-                    //Vector<int> hx1y1 = _seed.Hash(hx1 + cellY);
-                    //Vector<int> hx2y1 = _seed.Hash(hx2 + cellY);
-                    //Vector<int> hx1y2 = _seed.Hash(hx1 + cellY + Vector<int>.One);
-                    //Vector<int> hx2y2 = _seed.Hash(hx2 + cellY + Vector<int>.One);
-
-                    //Vector<float> gx1y1 = _seed.GetGrad(hx1y1, ox1, oy1);
-                    //Vector<float> gx2y1 = _seed.GetGrad(hx2y1, ox2, oy1);
-                    //Vector<float> gx1y2 = _seed.GetGrad(hx1y2, ox1, oy2);
-                    //Vector<float> gx2y2 = _seed.GetGrad(hx2y2, ox2, oy2);
-
-                    Vector<float> gx1y1 = _seed.GetHashGrad(cellX, cellY, ox1, oy1);
-                    Vector<float> gx2y1 = _seed.GetHashGrad(cellX + Vector<int>.One, cellY, ox2, oy1);
-                    Vector<float> gx1y2 = _seed.GetHashGrad(cellX, cellY + Vector<int>.One, ox1, oy2);
-                    Vector<float> gx2y2 = _seed.GetHashGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, ox2, oy2);
+                    Vector<float> gx1y1 = _seed.GetGrad(cellX, cellY, ox1, oy1);
+                    Vector<float> gx2y1 = _seed.GetGrad(cellX + Vector<int>.One, cellY, ox2, oy1);
+                    Vector<float> gx1y2 = _seed.GetGrad(cellX, cellY + Vector<int>.One, ox1, oy2);
+                    Vector<float> gx2y2 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, ox2, oy2);
 
                     Vector<float> fx = Fade(ox1);
 
@@ -405,31 +322,14 @@ namespace PlanetGenerator
                     Vector<float> oz1 = vz - floorZ;
                     Vector<float> oz2 = oz1 - Vector<float>.One;
 
-                    Vector<int> hx1 = _seed.Hash(cellX);
-                    Vector<int> hx2 = _seed.Hash(cellX + Vector<int>.One);
-
-                    Vector<int> hx1y1 = _seed.Hash(hx1 + cellY);
-                    Vector<int> hx2y1 = _seed.Hash(hx2 + cellY);
-                    Vector<int> hx1y2 = _seed.Hash(hx1 + cellY + Vector<int>.One);
-                    Vector<int> hx2y2 = _seed.Hash(hx2 + cellY + Vector<int>.One);
-
-                    Vector<int> hx1y1z1 = _seed.Hash(hx1y1 + cellZ);
-                    Vector<int> hx2y1z1 = _seed.Hash(hx2y1 + cellZ);
-                    Vector<int> hx1y2z1 = _seed.Hash(hx1y2 + cellZ);
-                    Vector<int> hx2y2z1 = _seed.Hash(hx2y2 + cellZ);
-                    Vector<int> hx1y1z2 = _seed.Hash(hx1y1 + cellZ + Vector<int>.One);
-                    Vector<int> hx2y1z2 = _seed.Hash(hx2y1 + cellZ + Vector<int>.One);
-                    Vector<int> hx1y2z2 = _seed.Hash(hx1y2 + cellZ + Vector<int>.One);
-                    Vector<int> hx2y2z2 = _seed.Hash(hx2y2 + cellZ + Vector<int>.One);
-
-                    Vector<float> gx1y1z1 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz1);
-                    Vector<float> gx2y1z1 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz1);
-                    Vector<float> gx1y2z1 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz1);
-                    Vector<float> gx2y2z1 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz1);
-                    Vector<float> gx1y1z2 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz2);
-                    Vector<float> gx2y1z2 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz2);
-                    Vector<float> gx1y2z2 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz2);
-                    Vector<float> gx2y2z2 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz2);
+                    Vector<float> gx1y1z1 = _seed.GetGrad(cellX, cellY, cellZ, ox1, oy1, oz1);
+                    Vector<float> gx2y1z1 = _seed.GetGrad(cellX + Vector<int>.One, cellY, cellZ, ox2, oy1, oz1);
+                    Vector<float> gx1y2z1 = _seed.GetGrad(cellX, cellY + Vector<int>.One, cellZ, ox1, oy2, oz1);
+                    Vector<float> gx2y2z1 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, cellZ, ox2, oy2, oz1);
+                    Vector<float> gx1y1z2 = _seed.GetGrad(cellX, cellY, cellZ + Vector<int>.One, ox1, oy1, oz2);
+                    Vector<float> gx2y1z2 = _seed.GetGrad(cellX + Vector<int>.One, cellY, cellZ + Vector<int>.One, ox2, oy1, oz2);
+                    Vector<float> gx1y2z2 = _seed.GetGrad(cellX, cellY + Vector<int>.One, cellZ + Vector<int>.One, ox1, oy2, oz2);
+                    Vector<float> gx2y2z2 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, cellZ + Vector<int>.One, ox2, oy2, oz2);
 
                     Vector<float> fx = Fade(ox1);
                     Vector<float> fy = Fade(oy1);
@@ -504,56 +404,22 @@ namespace PlanetGenerator
                     Vector<float> ow1 = vw - floorW;
                     Vector<float> ow2 = ow1 - Vector<float>.One;
 
-                    Vector<int> hx1 = _seed.Hash(cellX);
-                    Vector<int> hx2 = _seed.Hash(cellX + Vector<int>.One);
-
-                    Vector<int> hx1y1 = _seed.Hash(hx1 + cellY);
-                    Vector<int> hx2y1 = _seed.Hash(hx2 + cellY);
-                    Vector<int> hx1y2 = _seed.Hash(hx1 + cellY + Vector<int>.One);
-                    Vector<int> hx2y2 = _seed.Hash(hx2 + cellY + Vector<int>.One);
-
-                    Vector<int> hx1y1z1 = _seed.Hash(hx1y1 + cellZ);
-                    Vector<int> hx2y1z1 = _seed.Hash(hx2y1 + cellZ);
-                    Vector<int> hx1y2z1 = _seed.Hash(hx1y2 + cellZ);
-                    Vector<int> hx2y2z1 = _seed.Hash(hx2y2 + cellZ);
-                    Vector<int> hx1y1z2 = _seed.Hash(hx1y1 + cellZ + Vector<int>.One);
-                    Vector<int> hx2y1z2 = _seed.Hash(hx2y1 + cellZ + Vector<int>.One);
-                    Vector<int> hx1y2z2 = _seed.Hash(hx1y2 + cellZ + Vector<int>.One);
-                    Vector<int> hx2y2z2 = _seed.Hash(hx2y2 + cellZ + Vector<int>.One);
-
-                    Vector<int> hx1y1z1w1 = _seed.Hash(hx1y1z1 + cellW);
-                    Vector<int> hx2y1z1w1 = _seed.Hash(hx2y1z1 + cellW);
-                    Vector<int> hx1y2z1w1 = _seed.Hash(hx1y2z1 + cellW);
-                    Vector<int> hx2y2z1w1 = _seed.Hash(hx2y2z1 + cellW);
-                    Vector<int> hx1y1z2w1 = _seed.Hash(hx1y1z2 + cellW);
-                    Vector<int> hx2y1z2w1 = _seed.Hash(hx2y1z2 + cellW);
-                    Vector<int> hx1y2z2w1 = _seed.Hash(hx1y2z2 + cellW);
-                    Vector<int> hx2y2z2w1 = _seed.Hash(hx2y2z2 + cellW);
-                    Vector<int> hx1y1z1w2 = _seed.Hash(hx1y1z1 + cellW + Vector<int>.One);
-                    Vector<int> hx2y1z1w2 = _seed.Hash(hx2y1z1 + cellW + Vector<int>.One);
-                    Vector<int> hx1y2z1w2 = _seed.Hash(hx1y2z1 + cellW + Vector<int>.One);
-                    Vector<int> hx2y2z1w2 = _seed.Hash(hx2y2z1 + cellW + Vector<int>.One);
-                    Vector<int> hx1y1z2w2 = _seed.Hash(hx1y1z2 + cellW + Vector<int>.One);
-                    Vector<int> hx2y1z2w2 = _seed.Hash(hx2y1z2 + cellW + Vector<int>.One);
-                    Vector<int> hx1y2z2w2 = _seed.Hash(hx1y2z2 + cellW + Vector<int>.One);
-                    Vector<int> hx2y2z2w2 = _seed.Hash(hx2y2z2 + cellW + Vector<int>.One);
-
-                    Vector<float> gx1y1z1w1 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz1, ow1);
-                    Vector<float> gx2y1z1w1 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz1, ow1);
-                    Vector<float> gx1y2z1w1 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz1, ow1);
-                    Vector<float> gx2y2z1w1 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz1, ow1);
-                    Vector<float> gx1y1z2w1 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz2, ow1);
-                    Vector<float> gx2y1z2w1 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz2, ow1);
-                    Vector<float> gx1y2z2w1 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz2, ow1);
-                    Vector<float> gx2y2z2w1 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz2, ow1);
-                    Vector<float> gx1y1z1w2 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz1, ow2);
-                    Vector<float> gx2y1z1w2 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz1, ow2);
-                    Vector<float> gx1y2z1w2 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz1, ow2);
-                    Vector<float> gx2y2z1w2 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz1, ow2);
-                    Vector<float> gx1y1z2w2 = _seed.GetGrad(hx1y1z1, ox1, oy1, oz2, ow2);
-                    Vector<float> gx2y1z2w2 = _seed.GetGrad(hx2y1z1, ox2, oy1, oz2, ow2);
-                    Vector<float> gx1y2z2w2 = _seed.GetGrad(hx1y2z1, ox1, oy2, oz2, ow2);
-                    Vector<float> gx2y2z2w2 = _seed.GetGrad(hx2y2z1, ox2, oy2, oz2, ow2);
+                    Vector<float> gx1y1z1w1 = _seed.GetGrad(cellX, cellY, cellZ, cellW, ox1, oy1, oz1, ow1);
+                    Vector<float> gx2y1z1w1 = _seed.GetGrad(cellX + Vector<int>.One, cellY, cellZ, cellW, ox2, oy1, oz1, ow1);
+                    Vector<float> gx1y2z1w1 = _seed.GetGrad(cellX, cellY + Vector<int>.One, cellZ, cellW, ox1, oy2, oz1, ow1);
+                    Vector<float> gx2y2z1w1 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, cellZ, cellW, ox2, oy2, oz1, ow1);
+                    Vector<float> gx1y1z2w1 = _seed.GetGrad(cellX, cellY, cellZ + Vector<int>.One, cellW, ox1, oy1, oz2, ow1);
+                    Vector<float> gx2y1z2w1 = _seed.GetGrad(cellX + Vector<int>.One, cellY, cellZ + Vector<int>.One, cellW, ox2, oy1, oz2, ow1);
+                    Vector<float> gx1y2z2w1 = _seed.GetGrad(cellX, cellY + Vector<int>.One, cellZ + Vector<int>.One, cellW, ox1, oy2, oz2, ow1);
+                    Vector<float> gx2y2z2w1 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, cellZ + Vector<int>.One, cellW, ox2, oy2, oz2, ow1);
+                    Vector<float> gx1y1z1w2 = _seed.GetGrad(cellX, cellY, cellZ, cellW + Vector<int>.One, ox1, oy1, oz1, ow2);
+                    Vector<float> gx2y1z1w2 = _seed.GetGrad(cellX + Vector<int>.One, cellY, cellZ, cellW + Vector<int>.One, ox2, oy1, oz1, ow2);
+                    Vector<float> gx1y2z1w2 = _seed.GetGrad(cellX, cellY + Vector<int>.One, cellZ, cellW + Vector<int>.One, ox1, oy2, oz1, ow2);
+                    Vector<float> gx2y2z1w2 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, cellZ, cellW + Vector<int>.One, ox2, oy2, oz1, ow2);
+                    Vector<float> gx1y1z2w2 = _seed.GetGrad(cellX, cellY, cellZ + Vector<int>.One, cellW + Vector<int>.One, ox1, oy1, oz2, ow2);
+                    Vector<float> gx2y1z2w2 = _seed.GetGrad(cellX + Vector<int>.One, cellY, cellZ + Vector<int>.One, cellW + Vector<int>.One, ox2, oy1, oz2, ow2);
+                    Vector<float> gx1y2z2w2 = _seed.GetGrad(cellX, cellY + Vector<int>.One, cellZ + Vector<int>.One, cellW + Vector<int>.One, ox1, oy2, oz2, ow2);
+                    Vector<float> gx2y2z2w2 = _seed.GetGrad(cellX + Vector<int>.One, cellY + Vector<int>.One, cellZ + Vector<int>.One, cellW + Vector<int>.One, ox2, oy2, oz2, ow2);
 
                     Vector<float> fx = Fade(ox1);
                     Vector<float> fy = Fade(oy1);

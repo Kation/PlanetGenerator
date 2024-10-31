@@ -23,8 +23,8 @@ namespace PlanetGenerator.Testing
 
             //noise.Get(6.25f, 6.25f);
 
-            var v1 = noise.Seed.GetHashGrad(12, 12, 0.25f, 0.25f);
-            var v2 = noise.Seed.GetHashGrad(new Vector<int>(12), new Vector<int>(12), new Vector<float>(0.25f), new Vector<float>(0.25f));
+            var v1 = noise.Seed.GetGrad(12, 12, 0.25f, 0.25f);
+            var v2 = noise.Seed.GetGrad(new Vector<int>(12), new Vector<int>(12), new Vector<float>(0.25f), new Vector<float>(0.25f));
 
             Bitmap bitmap = new Bitmap(1600, 1600, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             for (int x = 0; x < bitmap.Width; x++)

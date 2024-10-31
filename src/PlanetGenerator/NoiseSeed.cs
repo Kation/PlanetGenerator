@@ -66,28 +66,32 @@ namespace PlanetGenerator
             _vmask = new Vector<int>(_mask);
         }
 
-        public float GetGrad(int hash, float offsetX)
+        public float GetGrad(int x, float offsetX)
         {
-            return _gradD1[hash] * offsetX;
+            return _gradD1[Hash(x)] * offsetX;
         }
 
-        public float GetGrad(int hash, float offsetX, float offsetY)
+        public float GetGrad(int x, int y, float offsetX, float offsetY)
         {
+            var hash = Hash(Hash(x) + y);
             return _gradD2x[hash] * offsetX + _gradD2y[hash] * offsetY;
         }
 
-        public float GetGrad(int hash, float offsetX, float offsetY, float offsetZ)
+        public float GetGrad(int x, int y, int z, float offsetX, float offsetY, float offsetZ)
         {
+            var hash = Hash(Hash(Hash(x) + y) + z);
             return _gradD3x[hash] * offsetX + _gradD3y[hash] * offsetY + _gradD3z[hash] * offsetZ;
         }
 
-        public float GetGrad(int hash, float offsetX, float offsetY, float offsetZ, float offsetW)
+        public float GetGrad(int x, int y, int z, int w, float offsetX, float offsetY, float offsetZ, float offsetW)
         {
+            var hash = Hash(Hash(Hash(Hash(x) + y) + z) + w);
             return _gradD4x[hash] * offsetX + _gradD4y[hash] * offsetY + _gradD4z[hash] * offsetZ + _gradD4w[hash] * offsetZ;
         }
 
-        public Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX)
+        public Vector<float> GetGrad(Vector<int> x, Vector<float> offsetX)
         {
+            var hash = Hash(x);
             Span<float> gx = stackalloc float[Vector<float>.Count];
             ref float p = ref MemoryMarshal.GetArrayDataReference(_gradD1);
             for (int i = 0; i < Vector<int>.Count; i++)
@@ -97,8 +101,9 @@ namespace PlanetGenerator
             return new Vector<float>(gx) * offsetX;
         }
 
-        public Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY)
+        public Vector<float> GetGrad(Vector<int> x, Vector<int> y, Vector<float> offsetX, Vector<float> offsetY)
         {
+            var hash = Hash(Hash(x) + y);
             Span<float> gx = stackalloc float[Vector<float>.Count];
             Span<float> gy = stackalloc float[Vector<float>.Count];
             ref float px = ref MemoryMarshal.GetArrayDataReference(_gradD2x);
@@ -111,8 +116,9 @@ namespace PlanetGenerator
             return new Vector<float>(gx) * offsetX + new Vector<float>(gy) * offsetY;
         }
 
-        public Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ)
+        public Vector<float> GetGrad(Vector<int> x, Vector<int> y, Vector<int> z, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ)
         {
+            var hash = Hash(Hash(Hash(x) + y) + z);
             Span<float> gx = stackalloc float[Vector<float>.Count];
             Span<float> gy = stackalloc float[Vector<float>.Count];
             Span<float> gz = stackalloc float[Vector<float>.Count];
@@ -128,8 +134,9 @@ namespace PlanetGenerator
             return new Vector<float>(gx) * offsetX + new Vector<float>(gy) * offsetY + new Vector<float>(gz) * offsetZ;
         }
 
-        public Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ, Vector<float> offsetW)
+        public Vector<float> GetGrad(Vector<int> x, Vector<int> y, Vector<int> z, Vector<int> w, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ, Vector<float> offsetW)
         {
+            var hash = Hash(Hash(Hash(Hash(x) + y) + z) + w);
             Span<float> gx = stackalloc float[Vector<float>.Count];
             Span<float> gy = stackalloc float[Vector<float>.Count];
             Span<float> gz = stackalloc float[Vector<float>.Count];
@@ -148,24 +155,37 @@ namespace PlanetGenerator
             return new Vector<float>(gx) * offsetX + new Vector<float>(gy) * offsetY + new Vector<float>(gz) * offsetZ + new Vector<float>(gw) * offsetW;
         }
 
-        public float GetHashGrad(int x, int y, float offsetX, float offsetY)
+        public float GetHashValue(int x)
         {
-            throw new NotImplementedException();
+            return _gradD1[Hash(x)];
         }
 
-        public Vector<float> GetHashGrad(Vector<int> x, Vector<int> y, Vector<float> offsetX, Vector<float> offsetY)
+        public Vector2 GetHashValue(int x, int y)
         {
-            throw new NotImplementedException();
+            var hash = Hash(Hash(x) + y);
+            return new Vector2(_gradD2x[hash], _gradD2y[hash]);
+        }
+
+        public Vector3 GetHashValue(int x, int y, int z)
+        {
+            var hash = Hash(Hash(Hash(x) + y) + z);
+            return new Vector3(_gradD3x[hash], _gradD3y[hash], _gradD3z[hash]);
+        }
+
+        public Vector4 GetHashValue(int x, int y, int z, int w)
+        {
+            var hash = Hash(Hash(Hash(Hash(x) + y) + z) + w);
+            return new Vector4(_gradD4x[hash], _gradD4y[hash], _gradD4z[hash], _gradD4w[hash]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Hash(int value)
+        private int Hash(int value)
         {
             ref int p = ref MemoryMarshal.GetArrayDataReference(_perm);
             return Unsafe.Add(ref p, value & _mask);
         }
 
-        public Vector<int> Hash(Vector<int> value)
+        private Vector<int> Hash(Vector<int> value)
         {
             value &= _vmask;
             ref int p = ref MemoryMarshal.GetArrayDataReference(_perm);

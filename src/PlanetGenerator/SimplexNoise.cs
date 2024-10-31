@@ -46,14 +46,12 @@ namespace PlanetGenerator
             var offset0 = x - floorX;
             var offset1 = offset0 - 1;
             var cellX = (int)floorX + cellOffsetX;
-            var h0 = _seed.Hash(cellX);
-            var h1 = _seed.Hash(cellX + 1);
             var g1 = 1f - offset0 * offset0;
             g1 = g1 * g1;
-            g1 = g1 * g1 * _seed.GetGrad(h0, offset0);
+            g1 = g1 * g1 * _seed.GetGrad(cellX, offset0);
             var g2 = 1f - offset1 * offset1;
             g2 = g2 * g2;
-            g2 = g2 * g2 * _seed.GetGrad(h1, offset1);
+            g2 = g2 * g2 * _seed.GetGrad(cellX + 1, offset1);
             return (g1 + g2) * 0.395f;
         }
 
@@ -87,25 +85,17 @@ namespace PlanetGenerator
             var simplexOffset0x = x - simplexFloorX;
             var simplexOffset0y = y - simplexFloorY;
 
-            var hx0 = _seed.Hash(cellX);
-            var hx1 = _seed.Hash(cellX + 1);
-
-            int h0, h1, h2;
-            h0 = _seed.Hash(hx0 + cellY);
-
             //计算单元格第二个点的位置
             int cellOffset1x, cellOffset1y;
             if (cellPositionX - cellFloorX >= cellPositionY - cellFloorY)
             {
                 cellOffset1x = 1;
                 cellOffset1y = 0;
-                h1 = _seed.Hash(hx1 + cellY);
             }
             else
             {
                 cellOffset1x = 0;
                 cellOffset1y = 1;
-                h1 = _seed.Hash(hx0 + cellY + 1);
             }
             //输入点到单型第二个点坐标的差值
             var simplexOffset1x = simplexOffset0x - cellOffset1x + skewFromCell;
@@ -116,8 +106,6 @@ namespace PlanetGenerator
 
             float total = 0f;
 
-            h2 = _seed.Hash(hx1 + cellY + 1);
-
             //计算各个顶点梯度值
             {
                 sum = simplexOffset0x * simplexOffset0x + simplexOffset0y * simplexOffset0y;
@@ -127,7 +115,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h0, simplexOffset0x, simplexOffset0y);
+                var grad = _seed.GetGrad(cellX, cellY, simplexOffset0x, simplexOffset0y);
                 total += grad * sum;
             }
             {
@@ -138,7 +126,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h1, simplexOffset1x, simplexOffset1y);
+                var grad = _seed.GetGrad(cellX + cellOffset1x, cellY + cellOffset1y, simplexOffset1x, simplexOffset1y);
                 total += grad * sum;
             }
             {
@@ -150,7 +138,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h2, simplexOffset2x, simplexOffset2y);
+                var grad = _seed.GetGrad(cellX + 1, cellY + 1, simplexOffset2x, simplexOffset2y);
                 total += grad * sum;
             }
             total = total * sample;
@@ -187,11 +175,6 @@ namespace PlanetGenerator
             var simplexOffset0y = y - simplexFloorY;
             var simplexOffset0z = z - simplexFloorZ;
 
-            var hx0 = _seed.Hash(cellX);
-            var hx1 = _seed.Hash(cellX + 1);
-
-            var h0 = _seed.Hash(_seed.Hash(hx0 + cellY) + cellZ);
-
             var ox = cellPositionX - cellFloorX;
             var oy = cellPositionY - cellFloorY;
             var oz = cellPositionZ - cellFloorZ;
@@ -208,10 +191,6 @@ namespace PlanetGenerator
                 cellOffset2x = rankx >= 1 ? 1 : 0,
                 cellOffset2y = ranky >= 1 ? 1 : 0,
                 cellOffset2z = rankz >= 1 ? 1 : 0;
-
-            int h1 = _seed.Hash(_seed.Hash(_seed.Hash(cellX + cellOffset1x) + cellY + cellOffset1y) + cellZ + cellOffset1z);
-            int h2 = _seed.Hash(_seed.Hash(_seed.Hash(cellX + cellOffset2x) + cellY + cellOffset2y) + cellZ + cellOffset2z);
-            int h3 = _seed.Hash(_seed.Hash(hx1 + cellY + 1) + cellZ + 1);
 
             var simplexOffset1x = simplexOffset0x - cellOffset1x + skewFromCell;
             var simplexOffset1y = simplexOffset0y - cellOffset1y + skewFromCell;
@@ -234,7 +213,7 @@ namespace PlanetGenerator
                 //计算单元格的梯度值
                 sum *= sum;
                 sum *= sum;
-                var grad = _seed.GetGrad(h0, simplexOffset0x, simplexOffset0y, simplexOffset0z);
+                var grad = _seed.GetGrad(cellX, cellY, cellZ, simplexOffset0x, simplexOffset0y, simplexOffset0z);
                 total = grad * sum;
             }
             {
@@ -245,7 +224,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h1, simplexOffset1x, simplexOffset1y, simplexOffset1z);
+                var grad = _seed.GetGrad(cellX + cellOffset1x, cellY + cellOffset1y, cellZ + cellOffset1z, simplexOffset1x, simplexOffset1y, simplexOffset1z);
                 total += grad * sum;
             }
             {
@@ -257,7 +236,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h2, simplexOffset2x, simplexOffset2y, simplexOffset2z);
+                var grad = _seed.GetGrad(cellX + cellOffset2x, cellY + cellOffset2y, cellZ + cellOffset2z, simplexOffset2x, simplexOffset2y, simplexOffset2z);
                 total += grad * sum;
             }
             {
@@ -269,7 +248,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h3, simplexOffset3x, simplexOffset3y, simplexOffset3z);
+                var grad = _seed.GetGrad(cellX + 1, cellY + 1, cellZ + 1, simplexOffset3x, simplexOffset3y, simplexOffset3z);
                 total += grad * sum;
             }
             total = total * sample;
@@ -311,11 +290,6 @@ namespace PlanetGenerator
             var simplexOffset0z = z - simplexFloorZ;
             var simplexOffset0w = w - simplexFloorW;
 
-            var hx0 = _seed.Hash(cellX);
-            var hx1 = _seed.Hash(cellX + 1);
-
-            var h0 = _seed.Hash(_seed.Hash(_seed.Hash(hx0 + cellY) + cellZ) + cellW);
-
             var ox = cellPositionX - cellFloorX;
             var oy = cellPositionY - cellFloorY;
             var oz = cellPositionZ - cellFloorZ;
@@ -334,11 +308,6 @@ namespace PlanetGenerator
             int cellOffset1x = rankx >= 3 ? 1 : 0, cellOffset1y = ranky >= 3 ? 1 : 0, cellOffset1z = rankz >= 3 ? 1 : 0, cellOffset1w = rankw >= 3 ? 1 : 0,
                 cellOffset2x = rankx >= 2 ? 1 : 0, cellOffset2y = ranky >= 2 ? 1 : 0, cellOffset2z = rankz >= 2 ? 1 : 0, cellOffset2w = rankw >= 2 ? 1 : 0,
                 cellOffset3x = rankx >= 1 ? 1 : 0, cellOffset3y = ranky >= 1 ? 1 : 0, cellOffset3z = rankz >= 1 ? 1 : 0, cellOffset3w = rankw >= 1 ? 1 : 0;
-
-            int h1 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellX + cellOffset1x) + cellY + cellOffset1y) + cellZ + cellOffset1z) + cellW + cellOffset1w);
-            int h2 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellX + cellOffset2x) + cellY + cellOffset2y) + cellZ + cellOffset2z) + cellW + cellOffset2w);
-            int h3 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellX + cellOffset3x) + cellY + cellOffset3y) + cellZ + cellOffset3z) + cellW + cellOffset3w);
-            int h4 = _seed.Hash(_seed.Hash(_seed.Hash(hx1 + cellY + 1) + cellZ + 1) + cellW + 1);
 
             var simplexOffset1x = simplexOffset0x - cellOffset1x + skewFromCell;
             var simplexOffset1y = simplexOffset0y - cellOffset1y + skewFromCell;
@@ -368,7 +337,7 @@ namespace PlanetGenerator
                 //计算单元格的梯度值
                 sum *= sum;
                 sum *= sum;
-                var grad = _seed.GetGrad(h0, simplexOffset0x, simplexOffset0y, simplexOffset0z, simplexOffset0w);
+                var grad = _seed.GetGrad(cellX, cellY, cellZ, cellW, simplexOffset0x, simplexOffset0y, simplexOffset0z, simplexOffset0w);
                 total = grad * sum;
             }
             {
@@ -379,7 +348,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h1, simplexOffset1x, simplexOffset1y, simplexOffset1z, simplexOffset1w);
+                var grad = _seed.GetGrad(cellX + cellOffset1x, cellY + cellOffset1y, cellZ + cellOffset1z, cellW + cellOffset1w, simplexOffset1x, simplexOffset1y, simplexOffset1z, simplexOffset1w);
                 total += grad * sum;
             }
             {
@@ -391,7 +360,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h2, simplexOffset2x, simplexOffset2y, simplexOffset2z, simplexOffset2w);
+                var grad = _seed.GetGrad(cellX + cellOffset2x, cellY + cellOffset2y, cellZ + cellOffset2z, cellW + cellOffset2w, simplexOffset2x, simplexOffset2y, simplexOffset2z, simplexOffset2w);
                 total += grad * sum;
             }
             {
@@ -403,7 +372,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h3, simplexOffset3x, simplexOffset3y, simplexOffset3z, simplexOffset3w);
+                var grad = _seed.GetGrad(cellX + cellOffset3x, cellY + cellOffset3y, cellZ + cellOffset3z, cellW + cellOffset3w, simplexOffset3x, simplexOffset3y, simplexOffset3z, simplexOffset3w);
                 total += grad * sum;
             }
             {
@@ -415,7 +384,7 @@ namespace PlanetGenerator
                 sum *= sum;
                 sum *= sum;
                 //计算单元格的梯度值
-                var grad = _seed.GetGrad(h4, simplexOffset4y, simplexOffset4z, simplexOffset4w);
+                var grad = _seed.GetGrad(cellX + 1, cellY + 1, cellZ + 1, cellW + 1, simplexOffset4x, simplexOffset4y, simplexOffset4z, simplexOffset4w);
                 total += grad * sum;
             }
             total = total * sample;
@@ -463,16 +432,13 @@ namespace PlanetGenerator
                     var ox1 = vx - cellXFloor;
                     var ox2 = ox1 - Vector<float>.One;
 
-                    var h0 = _seed.Hash(cellX);
-                    var h1 = _seed.Hash(cellX + Vector<int>.One);
-
                     {
                         var sum = ox1 * ox1;
                         sum = _HalfVector - sum;
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h0, ox1);
+                        sum *= _seed.GetGrad(cellX, ox1);
                         sumValueVector = sum;
                     }
                     {
@@ -481,7 +447,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h1, ox2);
+                        sum *= _seed.GetGrad(cellX + Vector<int>.One, ox2);
                         sumValueVector += sum;
                     }
                     sumValueVector *= sample;
@@ -582,11 +548,6 @@ namespace PlanetGenerator
                     var ox3 = ox1 - vskewFromCell2;
                     var oy3 = oy1 - vskewFromCell2;
 
-                    //计算梯度
-                    var h0 = _seed.Hash(_seed.Hash(cellXFloorInt) + cellYFloorInt);
-                    var h1 = _seed.Hash(_seed.Hash(cellXFloorInt + xOffsetInt) + cellYFloorInt + yOffsetInt);
-                    var h2 = _seed.Hash(_seed.Hash(cellXFloorInt + Vector<int>.One) + cellYFloorInt + Vector<int>.One);
-
                     //顶点0
                     {
                         //x
@@ -597,7 +558,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h0, ox1, oy1);
+                        sum *= _seed.GetGrad(cellXFloorInt, cellYFloorInt, ox1, oy1);
                         sumValueVector = sum;
                     }
                     {
@@ -609,7 +570,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h1, ox2, oy2);
+                        sum *= _seed.GetGrad(cellXFloorInt + Vector<int>.One, cellYFloorInt + Vector<int>.One, ox2, oy2);
                         sumValueVector += sum;
                     }
                     {
@@ -621,7 +582,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h2, ox3, oy3);
+                        sum *= _seed.GetGrad(cellXFloorInt, cellYFloorInt, ox3, oy3);
                         sumValueVector += sum;
                     }
                     sumValueVector *= sample;
@@ -743,11 +704,6 @@ namespace PlanetGenerator
                     var oy4 = oy1 - v1 + vskewFromCell3;
                     var oz4 = oz1 - v1 + vskewFromCell3;
 
-                    var h0 = _seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt) + cellYFloorInt) + cellZFloorInt);
-                    var h1 = _seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + xOffset1Int) + cellYFloorInt + yOffset1Int) + cellZFloorInt + zOffset1Int);
-                    var h2 = _seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + xOffset2Int) + cellYFloorInt + yOffset2Int) + cellZFloorInt + zOffset2Int);
-                    var h3 = _seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + Vector<int>.One) + cellYFloorInt + Vector<int>.One) + cellZFloorInt + Vector<int>.One);
-
                     //顶点0
                     {
                         var sum = ox1 * ox1;
@@ -757,7 +713,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h0, ox1, oy1, oz1);
+                        sum *= _seed.GetGrad(cellXFloorInt, cellYFloorInt, cellZFloorInt, ox1, oy1, oz1);
                         sumValueVector = sum;
                     }
                     {
@@ -768,7 +724,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h1, ox2, oy2, oz2);
+                        sum *= _seed.GetGrad(cellXFloorInt + xOffset1Int, cellYFloorInt + yOffset1Int, cellZFloorInt + zOffset1Int, ox2, oy2, oz2);
                         sumValueVector += sum;
                     }
                     {
@@ -779,7 +735,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h2, ox3, oy3, oz3);
+                        sum *= _seed.GetGrad(cellXFloorInt + xOffset2Int, cellYFloorInt + yOffset2Int, cellZFloorInt + zOffset2Int, ox3, oy3, oz3);
                         sumValueVector += sum;
                     }
                     {
@@ -790,7 +746,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h3, ox4, oy4, oz4);
+                        sum *= _seed.GetGrad(cellXFloorInt + Vector<int>.One, cellYFloorInt + Vector<int>.One, cellZFloorInt + Vector<int>.One, ox4, oy4, oz4);
                         sumValueVector += sum;
                     }
                     sumValueVector *= sample;
@@ -943,11 +899,6 @@ namespace PlanetGenerator
                     var oz5 = oz1 - v1 + vskewFromCell4;
                     var ow5 = ow1 - v1 + vskewFromCell4;
 
-                    var h0 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt) + cellYFloorInt) + cellZFloorInt) + cellWFloorInt);
-                    var h1 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + xOffset1Int) + cellYFloorInt + yOffset1Int) + cellZFloorInt + zOffset1Int) + cellWFloorInt + wOffset1Int);
-                    var h2 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + xOffset2Int) + cellYFloorInt + yOffset2Int) + cellZFloorInt + zOffset2Int) + cellWFloorInt + wOffset2Int);
-                    var h3 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + xOffset3Int) + cellYFloorInt + yOffset3Int) + cellZFloorInt + zOffset3Int) + cellWFloorInt + wOffset3Int);
-                    var h4 = _seed.Hash(_seed.Hash(_seed.Hash(_seed.Hash(cellXFloorInt + Vector<int>.One) + cellYFloorInt + Vector<int>.One) + cellZFloorInt + Vector<int>.One) + cellWFloorInt + Vector<int>.One);
                     //顶点0
                     {
                         var sum = ox1 * ox1;
@@ -958,7 +909,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h0, ox1, oy1, oz1, ow1);
+                        sum *= _seed.GetGrad(cellXFloorInt, cellYFloorInt, cellZFloorInt, cellWFloorInt, ox1, oy1, oz1, ow1);
                         sumValueVector = sum;
                     }
                     {
@@ -969,7 +920,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h1, ox2, oy2, oz2, ow2);
+                        sum *= _seed.GetGrad(cellXFloorInt + xOffset1Int, cellYFloorInt + yOffset1Int, cellZFloorInt + zOffset1Int, cellWFloorInt + wOffset1Int, ox2, oy2, oz2, ow2);
                         sumValueVector += sum;
                     }
                     {
@@ -981,7 +932,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h2, ox3, oy3, oz3, ow3);
+                        sum *= _seed.GetGrad(cellXFloorInt + xOffset2Int, cellYFloorInt + yOffset2Int, cellZFloorInt + zOffset2Int, cellWFloorInt + wOffset2Int, ox3, oy3, oz3, ow3);
                         sumValueVector += sum;
                     }
                     {
@@ -993,7 +944,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h3, ox4, oy4, oz4, ow4);
+                        sum *= _seed.GetGrad(cellXFloorInt + xOffset3Int, cellYFloorInt + yOffset3Int, cellZFloorInt + zOffset3Int, cellWFloorInt + wOffset3Int, ox4, oy4, oz4, ow4);
                         sumValueVector += sum;
                     }
                     {
@@ -1005,7 +956,7 @@ namespace PlanetGenerator
                         sum = Vector.Max(Vector<float>.Zero, sum);
                         sum *= sum;
                         sum *= sum;
-                        sum *= _seed.GetGrad(h4, ox5, oy5, oz5, ow5);
+                        sum *= _seed.GetGrad(cellXFloorInt + Vector<int>.One, cellYFloorInt + Vector<int>.One, cellZFloorInt + Vector<int>.One, cellWFloorInt + Vector<int>.One, ox5, oy5, oz5, ow5);
                         sumValueVector += sum;
                     }
                     sumValueVector *= sample;

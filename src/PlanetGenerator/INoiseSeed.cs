@@ -9,33 +9,28 @@ namespace PlanetGenerator
 {
     public interface INoiseSeed
     {
-        int Hash(int value);
+        float GetGrad(int x, float offsetX);
 
-        Vector<int> Hash(Vector<int> value);
+        float GetGrad(int x, int y, float offsetX, float offsetY);
 
-        float GetGrad(int hash, float offsetX);
+        float GetGrad(int x, int y, int z, float offsetX, float offsetY, float offsetZ);
 
-        float GetGrad(int hash, float offsetX, float offsetY);
+        float GetGrad(int x, int y, int z, int w, float offsetX, float offsetY, float offsetZ, float offsetW);
 
-        float GetGrad(int hash, float offsetX, float offsetY, float offsetZ);
+        Vector<float> GetGrad(Vector<int> x, Vector<float> offsetX);
 
-        float GetGrad(int hash, float offsetX, float offsetY, float offsetZ, float offsetW);
+        Vector<float> GetGrad(Vector<int> x, Vector<int> y, Vector<float> offsetX, Vector<float> offsetY);
 
-        Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX);
+        Vector<float> GetGrad(Vector<int> x, Vector<int> y, Vector<int> z, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ);
 
-        Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY);
+        Vector<float> GetGrad(Vector<int> x, Vector<int> y, Vector<int> z, Vector<int> w, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ, Vector<float> offsetW);
 
-        Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ);
+        float GetHashValue(int x);
 
-        Vector<float> GetGrad(Vector<int> hash, Vector<float> offsetX, Vector<float> offsetY, Vector<float> offsetZ, Vector<float> offsetW);
+        Vector2 GetHashValue(int x, int y);
 
+        Vector3 GetHashValue(int x, int y, int z);
 
-        //float GetHashGrad(int x, float offsetX);
-
-        float GetHashGrad(int x, int y, float offsetX, float offsetY);
-
-        //float GetHashGrad(int x, int y, int w, float offsetX, float offsetY, float offsetW);
-
-        Vector<float> GetHashGrad(Vector<int> x, Vector<int> y, Vector<float> offsetX, Vector<float> offsetY);
+        Vector4 GetHashValue(int x, int y, int z, int w);
     }
 }

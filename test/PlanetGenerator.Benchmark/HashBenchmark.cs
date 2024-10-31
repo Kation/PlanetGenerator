@@ -46,7 +46,7 @@ namespace PlanetGenerator.Benchmark
         {
             Parallel.For(0, 1600 * 1600, i =>
             {
-                _seed.GetHashGrad(_px[i], _py[i], _ox[i], _oy[i]);
+                _seed.GetGrad(_px[i], _py[i], _ox[i], _oy[i]);
             });
         }
 
@@ -61,7 +61,7 @@ namespace PlanetGenerator.Benchmark
                 var py = Vector.LoadAlignedNonTemporal<int>(_py + index);
                 var ox = Vector.LoadAlignedNonTemporal<float>(_ox + index);
                 var oy = Vector.LoadAlignedNonTemporal<float>(_oy + index);
-                _seed.GetHashGrad(px, py, ox, oy);
+                _seed.GetGrad(px, py, ox, oy);
             });
         }
     }
