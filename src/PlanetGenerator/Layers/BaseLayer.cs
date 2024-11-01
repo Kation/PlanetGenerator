@@ -20,8 +20,36 @@ namespace PlanetGenerator.Layers
 
         public void HandleBase(PlanetLayerContext context)
         {
-            
-
+            //计算地幔柱
+            List<Vector2> mantlePlumes = new List<Vector2>();
+            //半径
+            var r = context.Settings.PlanetRadius / 500f;
+            var rs = r * r;
+            var p = (int)MathF.Ceiling(r);
+            List<CubeVertex> vertices = [
+                new CubeVertex(0, p, 0),
+                new CubeVertex(1, p, 0),
+                new CubeVertex(0, p, 1),
+                new CubeVertex(1, p, 1),
+                new CubeVertex(0, p - 1, 0),
+                new CubeVertex(1, p - 1, 0),
+                new CubeVertex(0, p - 1, 1),
+                new CubeVertex(1, p - 1, 1)
+            ];
+            List<Cube> cubes = new List<Cube>();
+            var cube = new Cube(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5], vertices[6], vertices[7]);
+            cubes.Add(cube);
+            //找到八分之一的立方体
+            FindNextCubes(rs, cube, vertices, cubes);
+            var templateCubes = new List<Cube>(cubes);
+            //反转至其它方向立方体
+            FilpCubes(-1, 1, 1, templateCubes, vertices, cubes);
+            FilpCubes(1, 1, -1, templateCubes, vertices, cubes);
+            FilpCubes(-1, 1, -1, templateCubes, vertices, cubes);
+            FilpCubes(1, -1, 1, templateCubes, vertices, cubes);
+            FilpCubes(-1, -1, 1, templateCubes, vertices, cubes);
+            FilpCubes(1, -1, -1, templateCubes, vertices, cubes);
+            FilpCubes(-1, -1, -1, templateCubes, vertices, cubes);
 
             _faultZones = new float[10 * _FaultZoneLength];
             for (int index = 0; index < 10; index++)
@@ -57,6 +85,150 @@ namespace PlanetGenerator.Layers
                 }
             }
             _baseHandled = true;
+        }
+
+        private static void FindNextCubes(float rs, Cube cube, List<CubeVertex> vertices, List<Cube> cubes)
+        {
+            var x1y1z1 = new Vector3(cube.UpRightBottom.X, cube.UpRightBottom.Y, cube.UpRightBottom.Z).LengthSquared();
+            var x1y0z1 = new Vector3(cube.DownRightBottom.X, cube.DownRightBottom.Y, cube.DownRightBottom.Z).LengthSquared();
+            var x0y0z1 = new Vector3(cube.DownLeftBottom.X, cube.DownLeftBottom.Y, cube.DownLeftBottom.Z).LengthSquared();
+            var x1y0z0 = new Vector3(cube.DownRightTop.X, cube.DownRightTop.Y, cube.DownRightTop.Z).LengthSquared();
+            //判断(x1,?,z1)或(?,y0,z1)与球面相交，相交则z面相交于球面
+            if ((x1y1z1 >= rs && x1y0z1 <= rs) || (x0y0z1 <= rs && x1y0z1 >= rs))
+            {
+                //判断z面不存在则添加z面
+                if (!cubes.Any(t => t.X == cube.X && t.Y == cube.Y && t.Z == cube.Z + 1))
+                {
+                    var upLeftBottom = new CubeVertex(cube.UpLeftBottom.X, cube.UpLeftBottom.Y, cube.UpLeftBottom.Z + 1);
+                    var upRightBottom = new CubeVertex(cube.UpRightBottom.X, cube.UpRightBottom.Y, cube.UpRightBottom.Z + 1);
+                    var downLeftBottom = new CubeVertex(cube.DownLeftBottom.X, cube.DownLeftBottom.Y, cube.DownLeftBottom.Z + 1);
+                    var downRightBottom = new CubeVertex(cube.DownRightBottom.X, cube.DownRightBottom.Y, cube.DownRightBottom.Z + 1);
+                    vertices.Add(upLeftBottom);
+                    vertices.Add(upRightBottom);
+                    vertices.Add(downLeftBottom);
+                    vertices.Add(downRightBottom);
+                    var zCube = new Cube(cube.UpLeftBottom, cube.UpRightBottom, upLeftBottom, upRightBottom, cube.DownLeftBottom, cube.DownRightBottom, downLeftBottom, downRightBottom);
+                    cubes.Add(zCube);
+                    FindNextCubes(rs, zCube, vertices, cubes);
+                }
+            }
+            //判断(x1,?,z1)或(x1,y0,?)与球面相交，相交则x面相交于球面
+            if ((x1y1z1 >= rs && x1y0z1 <= rs) || (x1y0z0 <= rs && x1y0z1 >= rs))
+            {
+                //判断x面不存在则添加x面
+                if (!cubes.Any(t => t.X == cube.X + 1 && t.Y == cube.Y && t.Z == cube.Z))
+                {
+                    var upRightTop = new CubeVertex(cube.UpRightTop.X + 1, cube.UpRightTop.Y, cube.UpRightTop.Z);
+                    var upRightBottom = new CubeVertex(cube.UpRightBottom.X + 1, cube.UpRightBottom.Y, cube.UpRightBottom.Z);
+                    var downRightTop = new CubeVertex(cube.DownRightTop.X + 1, cube.DownRightTop.Y, cube.DownRightTop.Z);
+                    var downRightBottom = new CubeVertex(cube.DownRightBottom.X + 1, cube.DownRightBottom.Y, cube.DownRightBottom.Z);
+                    vertices.Add(upRightTop);
+                    vertices.Add(upRightBottom);
+                    vertices.Add(downRightTop);
+                    vertices.Add(downRightBottom);
+                    var xCube = new Cube(cube.UpRightTop, upRightTop, cube.UpRightBottom, upRightBottom, cube.DownRightTop, downRightTop, cube.DownRightBottom, downRightBottom);
+                    cubes.Add(xCube);
+                    FindNextCubes(rs, xCube, vertices, cubes);
+                }
+            }
+            //判断(x1,y0,z1)位于球面外，相交则y面相交于球面
+            //排除y=0
+            if (cube.Y != 0 && x1y0z1 >= rs)
+            {
+                //判断y面不存在则添加y面
+                if (!cubes.Any(t => t.X == cube.X && t.Y == cube.Y - 1 && t.Z == cube.Z))
+                {
+                    var downLeftTop = new CubeVertex(cube.DownLeftTop.X, cube.DownLeftTop.Y - 1, cube.DownLeftTop.Z);
+                    var downLeftBottom = new CubeVertex(cube.DownLeftBottom.X, cube.DownLeftBottom.Y - 1, cube.DownLeftBottom.Z);
+                    var downRightTop = new CubeVertex(cube.DownRightTop.X, cube.DownRightTop.Y - 1, cube.DownRightTop.Z);
+                    var downRightBottom = new CubeVertex(cube.DownRightBottom.X, cube.DownRightBottom.Y - 1, cube.DownRightBottom.Z);
+                    vertices.Add(downLeftTop);
+                    vertices.Add(downLeftBottom);
+                    vertices.Add(downRightTop);
+                    vertices.Add(downRightBottom);
+                    var xCube = new Cube(cube.DownLeftTop, cube.DownRightTop, cube.DownLeftBottom, cube.DownRightBottom, downLeftTop, downRightTop, downLeftBottom, downRightBottom);
+                    cubes.Add(xCube);
+                    FindNextCubes(rs, xCube, vertices, cubes);
+                }
+            }
+        }
+
+        private static void FilpCubes(int flipX, int flipY, int flipZ, List<Cube> templateCubes, List<CubeVertex> vertices, List<Cube> cubes)
+        {
+            foreach (var cube in templateCubes)
+            {
+                
+            }
+        }
+
+        private class CubeVertex
+        {
+            public CubeVertex(int x, int y, int z)
+            {
+                X = x;
+                Y = y;
+                Z = z;
+            }
+
+            public int X { get; set; }
+
+            public int Y { get; set; }
+
+            public int Z { get; set; }
+
+            public Vector3 Vector { get; set; }
+        }
+
+        private class Cube
+        {
+            public Cube(CubeVertex upLeftTop, CubeVertex upRightTop, CubeVertex upLeftBottom, CubeVertex upRightBottom, CubeVertex downLeftTop, CubeVertex downRightTop, CubeVertex downLeftBottom, CubeVertex downRightBottom)
+            {
+                UpLeftTop = upLeftTop;
+                UpRightTop = upRightTop;
+                UpLeftBottom = upLeftBottom;
+                UpRightBottom = upRightBottom;
+                DownLeftTop = downLeftTop;
+                DownRightTop = downRightTop;
+                DownLeftBottom = downLeftBottom;
+                DownRightBottom = downRightBottom;
+            }
+
+            public CubeVertex UpLeftTop { get; set; }
+            public CubeVertex UpRightTop { get; set; }
+            public CubeVertex UpLeftBottom { get; set; }
+            public CubeVertex UpRightBottom { get; set; }
+            public CubeVertex DownLeftTop { get; set; }
+            public CubeVertex DownRightTop { get; set; }
+            public CubeVertex DownLeftBottom { get; set; }
+            public CubeVertex DownRightBottom { get; set; }
+
+            public int X => DownLeftTop.X;
+            public int Y => DownLeftTop.Y;
+            public int Z => DownLeftTop.Z;
+
+            public static bool operator ==(Cube left, Cube right)
+            {
+                return left.X == right.X && left.Y == right.Y && left.Z == right.Z;
+            }
+
+            public static bool operator !=(Cube left, Cube right)
+            {
+                return left.X != right.X || left.Y != right.Y || left.Z != right.Z;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (obj == null)
+                    return false;
+                if (obj is Cube cube)
+                    return this == cube;
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
+            }
         }
 
         public void HandleTile(PlanetLayerTileContext context, int index, int zoomLevel)
