@@ -185,6 +185,7 @@ namespace PlanetGenerator
             return Unsafe.Add(ref p, value & _mask);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Vector<int> Hash(Vector<int> value)
         {
             value &= _vmask;
