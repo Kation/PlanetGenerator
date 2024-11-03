@@ -34,7 +34,7 @@ namespace PlanetGenerator
 
         public Tile GenerateTile(int index, int zoomLevel)
         {
-            PlanetHelper.GetLocationAndPositions(index, zoomLevel, Settings.TileResolution, Settings.PlanetRadius, out var positionX, out var positionY, out var positionZ, out var longitudes, out var latitudes);
+            PlanetHelper.GetLocationAndPositions(index, zoomLevel, Settings.TileResolution, out var positionX, out var positionY, out var positionZ, out var longitudes, out var latitudes);
             var context = new PlanetLayerTileContext(positionX, positionY, positionZ, longitudes, latitudes, Noise, Settings, _readOnlylayers);
             foreach (var layer in Layers)
                 layer.HandleTile(context, index, zoomLevel);

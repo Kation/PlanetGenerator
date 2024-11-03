@@ -16,6 +16,7 @@ namespace PlanetGenerator.Layers
         private const float _Move3 = 20000f;
         private bool _baseHandled = false;
         private float[]? _faultZones;
+        private Vector3[]? _mantlePlumes;
         private const int _FaultZoneLength = 1024 * 1024;
 
         public void HandleBase(PlanetLayerContext context)
@@ -36,51 +37,75 @@ namespace PlanetGenerator.Layers
                 new CubeVertex(0, p - 1, 1),
                 new CubeVertex(1, p - 1, 1)
             ];
-            List<Cube> cubes = new List<Cube>();
-            var cube = new Cube(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5], vertices[6], vertices[7]);
-            cubes.Add(cube);
+            List<Cube> cubes =
+            [
+                new Cube(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5], vertices[6], vertices[7]),
+            ];
             //找到八分之一的立方体
-            FindNextCubes(rs, cube, vertices, cubes);
+            FindNextCubes(rs, cubes[0], vertices, cubes);
             var templateCubes = new List<Cube>(cubes);
             //反转至其它方向立方体
-            FilpCubes(-1, 1, 1, templateCubes, vertices, cubes);
-            FilpCubes(1, 1, -1, templateCubes, vertices, cubes);
-            FilpCubes(-1, 1, -1, templateCubes, vertices, cubes);
-            FilpCubes(1, -1, 1, templateCubes, vertices, cubes);
-            FilpCubes(-1, -1, 1, templateCubes, vertices, cubes);
-            FilpCubes(1, -1, -1, templateCubes, vertices, cubes);
-            FilpCubes(-1, -1, -1, templateCubes, vertices, cubes);
+            FilpCubes(true, false, false, templateCubes, vertices, cubes);
+            FilpCubes(false, false, true, templateCubes, vertices, cubes);
+            FilpCubes(true, false, true, templateCubes, vertices, cubes);
+            FilpCubes(false, true, false, templateCubes, vertices, cubes);
+            FilpCubes(true, true, false, templateCubes, vertices, cubes);
+            FilpCubes(false, true, true, templateCubes, vertices, cubes);
+            FilpCubes(true, true, true, templateCubes, vertices, cubes);
+            //获取顶点向量
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i].Vector = context.Noise.Seed.GetHashValue(vertices[i].X, vertices[i].Y, vertices[i].Z);
+            }
+            var matchRR = 1f;
+            List<Vector4> matches = new List<Vector4>();
+            //遍历立方体查找符合条件的位置
+            foreach (var cube in cubes)
+            {
+                var vector = cube.UpLeftTop.Vector + cube.UpRightTop.Vector + cube.UpLeftBottom.Vector + cube.UpRightBottom.Vector +
+                    cube.DownLeftTop.Vector + cube.DownRightTop.Vector + cube.DownLeftBottom.Vector + cube.DownRightBottom.Vector;
+                int x, y, z;
+                x = cube.X < 0 ? cube.X + 1 : cube.X;
+                y = cube.Y < 0 ? cube.Y + 1 : cube.Y;
+                z = cube.Z < 0 ? cube.Z + 1 : cube.Z;
+                vector.X += x + 0.5f;
+                vector.Y += y + 0.5f;
+                vector.Z += z + 0.5f;
+
+                var value = MathF.Abs(vector.LengthSquared() - rs);
+                if (value < matchRR)
+                {
+                    matches.Add(new Vector4(vector, MathF.Sqrt(matchRR - value)));
+                }
+            }
+            //将坐标转换为经纬度
+            _mantlePlumes = new Vector3[matches.Count];
+            for (int i = 0; i < matches.Count; i++)
+            {
+                var match = matches[i];
+                PlanetHelper.GetLocation(match.X, match.Y, match.Z, r, out var lng, out var lat);
+                _mantlePlumes[i] = new Vector3(lng, lat, match.W);
+            }
 
             _faultZones = new float[10 * _FaultZoneLength];
             for (int index = 0; index < 10; index++)
             {
                 var faultZone = _faultZones.AsSpan().Slice(index * _FaultZoneLength, _FaultZoneLength);
-                PlanetHelper.GetLocationAndPositions(index, 0, 1024, context.Settings.PlanetRadius, out var positionX, out var positionY, out var positionZ, out var longitudes, out var latitudes);
+                PlanetHelper.GetLocations(index, 0, 1024, out var longitudes, out var latitudes);
 
                 for (int i = 0; i < _FaultZoneLength; i++)
                 {
-                    var value = context.Noise.Get(positionX[i] / 500f, positionY[i] / 500f, positionZ[i] / 500f) * 0.5f;
-                    if (value < 0)
-                        value = 0;
-                    //else
-                    //{
-                    //    var addValue = context.Noise.Get(positionX[i] / 250f, positionY[i] / 250f, positionZ[i] / 250f) * 0.75f;
-                    //    addValue += context.Noise.Get(positionX[i] / 125f, positionY[i] / 125f, positionZ[i] / 125f) * 0.25f;
-                    //    value *= (addValue + 1f) / 2f;
-                    //}
-                    //if (value < 0.25f)
-                    //    value = 0f;
-                    //else
-                    //{
-                    //    value = (value * 4f - 1f) / 3f * 2f;
-                    //    if (value > 1f)
-                    //        value = 1f;
-                    //}
-                    //var value = context.Noise.Get(positionX[i] / 250f, positionY[i] / 250f, positionZ[i] / 250f) * 0.5f;
-                    //value += context.Noise.Get(positionX[i] / 500f, positionY[i] / 500f, positionZ[i] / 500f) * 0.25f;
-                    //value += context.Noise.Get(positionX[i] / 1000f, positionY[i] / 1000f, positionZ[i] / 1000f) * 0.125f;
-                    //value += context.Noise.Get(positionX[i] / 2000f, positionY[i] / 2000f, positionZ[i] / 2000f) * 0.0625f;
-                    //value = (value + 1f) / 2f;
+                    float value = 0;
+                    for (int j = 0; j < _mantlePlumes.Length; j++)
+                    {
+                        var d = PlanetHelper.GetDistance(longitudes[i], latitudes[i], _mantlePlumes[j].X, _mantlePlumes[j].Y, context.Settings.PlanetRadius);
+                        if (d < 100f)
+                        {
+                            value += 1 - d / 100f;
+                            if (value > 1)
+                                value = 1;
+                        }
+                    }
                     faultZone[i] = value;
                 }
             }
@@ -153,15 +178,124 @@ namespace PlanetGenerator.Layers
             }
         }
 
-        private static void FilpCubes(int flipX, int flipY, int flipZ, List<Cube> templateCubes, List<CubeVertex> vertices, List<Cube> cubes)
+        private static void FilpCubes(bool flipX, bool flipY, bool flipZ, List<Cube> templateCubes, List<CubeVertex> vertices, List<Cube> cubes)
         {
             foreach (var cube in templateCubes)
             {
-                
+                var upLeftTop = cube.UpLeftTop;
+                var upRightTop = cube.UpRightTop;
+                var upLeftBottom = cube.UpLeftBottom;
+                var upRightBottom = cube.UpRightBottom;
+                var downLeftTop = cube.DownLeftTop;
+                var downRightTop = cube.DownRightTop;
+                var downLeftBottom = cube.DownLeftBottom;
+                var downRightBottom = cube.DownRightBottom;
+                if (flipX)
+                {
+                    var upLeftTop2 = new CubeVertex(-upRightTop.X, upRightTop.Y, upRightTop.Z);
+                    var upRightTop2 = new CubeVertex(-upLeftTop.X, upLeftTop.Y, upLeftTop.Z);
+                    var upLeftBottom2 = new CubeVertex(-upRightBottom.X, upRightBottom.Y, upRightBottom.Z);
+                    var upRightBottom2 = new CubeVertex(-upLeftBottom.X, upRightBottom.Y, upRightBottom.Z);
+                    var downLeftTop2 = new CubeVertex(-downRightTop.X, downRightTop.Y, downRightTop.Z);
+                    var downRightTop2 = new CubeVertex(-downLeftTop.X, downLeftTop.Y, downLeftTop.Z);
+                    var downLeftBottom2 = new CubeVertex(-downRightBottom.X, downRightBottom.Y, downRightBottom.Z);
+                    var downRightBottom2 = new CubeVertex(-downLeftBottom.X, downRightBottom.Y, downRightBottom.Z);
+
+                    upLeftTop = upLeftTop2;
+                    upRightTop = upRightTop2;
+                    upLeftBottom = upLeftBottom2;
+                    upRightBottom = upRightBottom2;
+                    downLeftTop = downLeftTop2;
+                    downRightTop = downRightTop2;
+                    downLeftBottom = downLeftBottom2;
+                    downRightBottom = downRightBottom2;
+                }
+                if (flipY)
+                {
+                    var upLeftTop2 = new CubeVertex(downLeftTop.X, -downLeftTop.Y, downLeftTop.Z);
+                    var upRightTop2 = new CubeVertex(downRightTop.X, -downRightTop.Y, downRightTop.Z);
+                    var upLeftBottom2 = new CubeVertex(downLeftBottom.X, -downLeftBottom.Y, downLeftBottom.Z);
+                    var upRightBottom2 = new CubeVertex(downRightBottom.X, -downRightBottom.Y, downRightBottom.Z);
+                    var downLeftTop2 = new CubeVertex(upLeftTop.X, -upLeftTop.Y, upLeftTop.Z);
+                    var downRightTop2 = new CubeVertex(upRightTop.X, -upRightTop.Y, upRightTop.Z);
+                    var downLeftBottom2 = new CubeVertex(upLeftBottom.X, -upLeftBottom.Y, upLeftBottom.Z);
+                    var downRightBottom2 = new CubeVertex(upRightBottom.X, -upRightBottom.Y, upRightBottom.Z);
+
+                    upLeftTop = upLeftTop2;
+                    upRightTop = upRightTop2;
+                    upLeftBottom = upLeftBottom2;
+                    upRightBottom = upRightBottom2;
+                    downLeftTop = downLeftTop2;
+                    downRightTop = downRightTop2;
+                    downLeftBottom = downLeftBottom2;
+                    downRightBottom = downRightBottom2;
+                }
+                if (flipZ)
+                {
+                    var upLeftTop2 = new CubeVertex(upLeftBottom.X, upLeftBottom.Y, -upLeftBottom.Z);
+                    var upRightTop2 = new CubeVertex(upRightBottom.X, upRightBottom.Y, -upRightBottom.Z);
+                    var upLeftBottom2 = new CubeVertex(upLeftTop.X, upLeftTop.Y, -upLeftTop.Z);
+                    var upRightBottom2 = new CubeVertex(upRightTop.X, upRightTop.Y, -upRightTop.Z);
+                    var downLeftTop2 = new CubeVertex(downLeftBottom.X, downLeftBottom.Y, -downLeftBottom.Z);
+                    var downRightTop2 = new CubeVertex(downRightBottom.X, downRightBottom.Y, -downRightBottom.Z);
+                    var downLeftBottom2 = new CubeVertex(downLeftTop.X, downLeftTop.Y, -downLeftTop.Z);
+                    var downRightBottom2 = new CubeVertex(downRightTop.X, downRightTop.Y, -downRightTop.Z);
+
+                    upLeftTop = upLeftTop2;
+                    upRightTop = upRightTop2;
+                    upLeftBottom = upLeftBottom2;
+                    upRightBottom = upRightBottom2;
+                    downLeftTop = downLeftTop2;
+                    downRightTop = downRightTop2;
+                    downLeftBottom = downLeftBottom2;
+                    downRightBottom = downRightBottom2;
+                }
+
+                var existUpLeftTop = vertices.FirstOrDefault(t => t == upLeftTop);
+                if (existUpLeftTop == null)
+                    vertices.Add(upLeftTop);
+                else
+                    upLeftTop = existUpLeftTop;
+                var existUpRightTop = vertices.FirstOrDefault(t => t == upRightTop);
+                if (existUpRightTop == null)
+                    vertices.Add(upRightTop);
+                else
+                    upRightTop = existUpRightTop;
+                var existUpLeftBottom = vertices.FirstOrDefault(t => t == upLeftBottom);
+                if (existUpLeftBottom == null)
+                    vertices.Add(upLeftBottom);
+                else
+                    upLeftBottom = existUpLeftBottom;
+                var existUpRightBottom = vertices.FirstOrDefault(t => t == upRightBottom);
+                if (existUpRightBottom == null)
+                    vertices.Add(upRightBottom);
+                else
+                    upRightBottom = existUpRightBottom;
+                var existDownLeftTop = vertices.FirstOrDefault(t => t == downLeftTop);
+                if (existDownLeftTop == null)
+                    vertices.Add(downLeftTop);
+                else
+                    downLeftTop = existDownLeftTop;
+                var existDownRightTop = vertices.FirstOrDefault(t => t == downRightTop);
+                if (existDownRightTop == null)
+                    vertices.Add(downRightTop);
+                else
+                    downRightTop = existDownRightTop;
+                var existDownLeftBottom = vertices.FirstOrDefault(t => t == downLeftBottom);
+                if (existDownLeftBottom == null)
+                    vertices.Add(downLeftBottom);
+                else
+                    downLeftBottom = existDownLeftBottom;
+                var existDownRightBottom = vertices.FirstOrDefault(t => t == downRightBottom);
+                if (existDownRightBottom == null)
+                    vertices.Add(downRightBottom);
+                else
+                    downRightBottom = existDownRightBottom;
+
+                cubes.Add(new Cube(upLeftTop, upRightTop, upLeftBottom, upRightBottom, downLeftTop, downRightTop, downLeftBottom, downRightBottom));
             }
         }
-
-        private class CubeVertex
+                private class CubeVertex
         {
             public CubeVertex(int x, int y, int z)
             {
@@ -177,6 +311,38 @@ namespace PlanetGenerator.Layers
             public int Z { get; set; }
 
             public Vector3 Vector { get; set; }
+
+            public static bool operator ==(CubeVertex? left, CubeVertex? right)
+            {
+                if (left is null && right is null)
+                    return true;
+                if (left is null || right is null)
+                    return false;
+                return left.X == right.X && left.Y == right.Y && left.Z == right.Z;
+            }
+
+            public static bool operator !=(CubeVertex? left, CubeVertex? right)
+            {
+                if (left is null && right is null)
+                    return false;
+                if (left is null || right is null)
+                    return true;
+                return left.X != right.X || left.Y != right.Y || left.Z != right.Z;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (obj == null)
+                    return false;
+                if (obj is CubeVertex vertex)
+                    return this == vertex;
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
+            }
         }
 
         private class Cube
@@ -206,13 +372,21 @@ namespace PlanetGenerator.Layers
             public int Y => DownLeftTop.Y;
             public int Z => DownLeftTop.Z;
 
-            public static bool operator ==(Cube left, Cube right)
+            public static bool operator ==(Cube? left, Cube? right)
             {
+                if (left is null && right is null)
+                    return true;
+                if (left is null || right is null)
+                    return false;
                 return left.X == right.X && left.Y == right.Y && left.Z == right.Z;
             }
 
-            public static bool operator !=(Cube left, Cube right)
+            public static bool operator !=(Cube? left, Cube? right)
             {
+                if (left == null && right == null)
+                    return false;
+                if (left == null || right == null)
+                    return true;
                 return left.X != right.X || left.Y != right.Y || left.Z != right.Z;
             }
 
@@ -235,178 +409,33 @@ namespace PlanetGenerator.Layers
         {
             if (!_baseHandled)
                 throw new InvalidOperationException("先处理基础部分才能处理分片。");
-            //List<Plate> plates = new List<Plate>();
-            var lngCell = 1f / context.Settings.PlateCount;
-            var rnd = new Random(context.Settings.Seed);
-            var c = 0;
-            //for (int i = 0; i < context.Settings.PlateCount; i++)
-            //{
-            //    while (true)
-            //    {
-            //        var offset = (context.Noise.GetHashFloat(c * 2) + context.Noise.GetHashFloat(c * 2 + 1)) / 2;
-            //        var lat = context.Noise.GetHashFloat(10000 + c * 100) * MathF.PI / 2;
-            //        var size = (context.Noise.GetHashFloat(-10000 + c * 100) + 1) / 2;
-            //        //var offset = (float)((rnd.NextDouble() - 0.5d) * 2);
-            //        //var lat = (float)((rnd.NextDouble() - 0.5d) * 2) * MathF.PI / 2;
-            //        //var size = (float)rnd.NextDouble();
-            //        var lng = lngCell * (c + offset) * MathF.PI * 2;
-            //        size = (context.Settings.PlateMaxRadius - context.Settings.PlateMinRadius) * size + context.Settings.PlateMinRadius;
-            //        var px = context.Settings.PlanetRadius * MathF.Cos(lat) * MathF.Cos(lng);
-            //        var pz = -context.Settings.PlanetRadius * MathF.Cos(lat) * MathF.Sin(lng);
-            //        var py = context.Settings.PlanetRadius * MathF.Sin(lat);
-            //        c++;
-            //        if (plates.Any(t => GetDistance(t.Longitude, t.Latitude, lng, lat, context.Settings.PlanetRadius) < t.Radius || GetDistance(t.Longitude, t.Latitude, lng, lat, context.Settings.PlanetRadius) < size))
-            //            continue;
-            //        plates.Add(new Plate
-            //        {
-            //            Longitude = lng,
-            //            Latitude = lat,
-            //            X = px,
-            //            Y = py,
-            //            Z = pz,
-            //            Radius = size
-            //        });
-            //        break;
-            //    }
-            //}
             var length = context.PositionX.Length;
             var data = new float[length];
-            //for (int i = 0; i < length; i++)
-            //{
-            //    List<EffectivePlate> effectivePlates = new List<EffectivePlate>();
-            //    for (int ii = 0; ii < plates.Count; ii++)
-            //    {
-            //        var plate = plates[ii];
-
-            //        //经过随机处理，计算实际半径
-            //        var angle = GetAngle(plate.X, plate.Y, plate.Z, context.PositionX[i], context.PositionY[i], context.PositionZ[i]);
-            //        if (plate.Longitude >= 0)
-            //        {
-            //            if (context.Longitudes[i] < plate.Longitude || ((context.Longitudes[i] - plate.Longitude > MathF.PI) && context.Longitudes[i] - MathF.PI * 2 < plate.Longitude))
-            //                angle = MathF.PI * 2 - angle;
-            //        }
-            //        else if (plate.Longitude < 0)
-            //        {
-            //            if (context.Longitudes[i] - plate.Longitude > MathF.PI && context.Longitudes[i] < plate.Longitude + MathF.PI * 2)
-            //                angle = MathF.PI * 2 - MathF.PI;
-            //        }
-            //        float x, y;
-            //        const float right = MathF.PI / 2;
-            //        const float down = right * 2;
-            //        const float left = right * 3;
-            //        if (angle == 0)
-            //        {
-            //            x = 0; y = 1;
-            //        }
-            //        else if (angle == right)
-            //        {
-            //            x = 1; y = 0;
-            //        }
-            //        else if (angle == down)
-            //        {
-            //            x = 0; y = -1;
-            //        }
-            //        else if (angle == left)
-            //        {
-            //            x = -1; y = 0;
-            //        }
-            //        else
-            //        {
-            //            y = MathF.Cos(angle);
-            //            x = MathF.Sin(angle);
-            //        }
-            //        //var o = context.Noise.Get(x + ii * _Move1, y + ii * _Move1) * 1f;
-            //        var o = context.Noise.Get(x * 2 + ii * _Move1 + 100000, y * 2 + ii * _Move1 + 100000) * 0.9f;
-            //        o += context.Noise.Get(x * 4 + ii * _Move1 + 100000, y * 4 + ii * _Move1 + 100000) * 0.05f;
-            //        o += context.Noise.Get(x * 8 + ii * _Move1 + 200000, y * 8 + ii * _Move1 + 200000) * 0.025f;
-            //        o += context.Noise.Get(x * 16 + ii * _Move1 + 300000, y * 16 + ii * _Move1 + 300000) * 0.0125f;
-            //        //var radiusActually = plate.Z; //plate.Z * (1 + context.Settings.PlateMaxRadiusOffset * context.Noise.Get(p.X, p.Y, p.Z));
-            //        var radiusActually = plate.Radius * (1 + context.Settings.PlateMaxRadiusOffset * o);
-            //        bool inner = false;
-            //        foreach (var item in effectivePlates)
-            //        {
-            //            var d = GetDistance(plate.Longitude, plate.Latitude, item.Longitude, item.Latitude, context.Settings.PlanetRadius);
-            //            if (d < item.Radius || d < radiusActually)
-            //            {
-            //                if (item.Radius < radiusActually)
-            //                {
-            //                    effectivePlates.Remove(item);
-            //                    break;
-            //                }
-            //                else
-            //                {
-            //                    inner = true;
-            //                    break;
-            //                }
-            //            }
-            //        }
-            //        if (inner)
-            //            continue;
-            //        var distance = GetDistance(context.Longitudes[i], context.Latitudes[i], plate.Longitude, plate.Latitude, context.Settings.PlanetRadius);
-            //        if (distance < radiusActually + 500)
-            //        {
-            //            effectivePlates.Add(new EffectivePlate { Distance = distance, Longitude = plate.Longitude, Latitude = plate.Latitude, Radius = radiusActually, Index = ii });
-            //        }
-            //    }
-            //    if (effectivePlates.Count == 0)
-            //    {
-            //        data[i] = -8f;
-            //    }
-            //    else
-            //    {
-            //        if (effectivePlates.Any(t => t.Distance < t.Radius))
-            //        {
-            //            foreach (var item in effectivePlates.Where(t => t.Distance > t.Radius).ToArray())
-            //                effectivePlates.Remove(item);
-            //            if (effectivePlates.Count > 1)
-            //            {
-            //                var mid = effectivePlates.Average(t => t.Distance - t.Radius);
-            //                var max = effectivePlates.Sum(t => t.Distance / 500f);
-            //                float o1, o2 = 0f;
-            //                foreach (var plate in effectivePlates)
-            //                {
-            //                    var n = (plate.Distance / plate.Radius) * (plate.Index * _Move3);
-            //                    o1 = context.Noise.Get(n + context.PositionX[i] / 100f, n + context.PositionY[i] / 100f, n + context.PositionZ[i] / 100f) * 0.5f;
-            //                    o1 += context.Noise.Get(n + context.PositionX[i] / 50f, n + context.PositionY[i] / 50f, n + context.PositionZ[i] / 50f) * 0.25f;
-            //                    o1 += context.Noise.Get(n + context.PositionX[i] / 25f, n + context.PositionY[i] / 25f, n + context.PositionZ[i] / 25f) * 0.125f;
-            //                    //o += context.Noise.Get(n + context.PositionX[i] / 2f, n + context.PositionY[i] / 2f, n + context.PositionZ[i] / 2f) * 0.0625f;
-            //                    o1 = (o1 + 1) / 2;
-            //                    data[i] += max * (1 - MathF.Abs((plate.Distance - plate.Radius) / mid - 1)) * o1 / effectivePlates.Count;
-            //                    o2 += context.Noise.Get(context.PositionX[i] / 1000f + plate.Index * _Move1, context.PositionY[i] / 1000f + plate.Index * _Move1, context.PositionZ[i] / 1000f + plate.Index * _Move1) / effectivePlates.Count;
-            //                }
-            //                data[i] += (5f + o2 * 5) * (1f - effectivePlates.Min(t => t.Distance / t.Radius));
-            //            }
-            //            else
-            //            {
-            //                var o = context.Noise.Get(context.PositionX[i] / 1000f, context.PositionY[i] / 1000f, context.PositionZ[i] / 1000f);
-            //                data[i] += (5f + o * 5) * (1f - effectivePlates[0].Distance / effectivePlates[0].Radius);
-            //            }
-            //        }
-            //        if (effectivePlates.All(t => t.Distance > t.Radius))
-            //        {
-            //            data[i] = effectivePlates.Min(t => (t.Distance - t.Radius) / 500f) * -4f;
-            //        }
-            //        foreach (var plate in effectivePlates)
-            //        {
-            //            if (plate.Distance < 50)
-            //            {
-            //                data[i] += 50f;
-            //            }
-            //            if (plate.Distance < 100)
-            //            {
-            //                data[i] += 25f;
-            //            }
-            //            if (plate.Distance < 200)
-            //            {
-            //                data[i] += 10f;
-            //            }
-            //        }
-            //    }
-            //    if (MathF.Abs(context.PositionX[i]) < 50 && MathF.Abs(context.PositionZ[i]) < 50)
-            //    {
-            //        data[i] += 30f;
-            //    }
-            //}
+            var mantlePlumeScale = context.Settings.PlanetRadius / 500f;
+            var mantlePlumeScale2 = context.Settings.PlanetRadius / 250f;
+            for (int i = 0; i < length; i++)
+            {
+                float mpv = 0;
+                for (int j = 0; j < _mantlePlumes!.Length; j++)
+                {
+                    var d = PlanetHelper.GetDistance(context.Longitudes[i], context.Latitudes[i], _mantlePlumes[j].X, _mantlePlumes[j].Y, context.Settings.PlanetRadius);
+                    const float maxD = 300f;
+                    if (d < maxD)
+                    {
+                        var v = d / maxD;
+                        if (v < 0.1f)
+                            v = 0.1f;
+                        mpv += MathF.Log10(v) * 10f;
+                    }
+                }
+                if (mpv != 0f)
+                {
+                    var n = (context.Noise.Get(context.PositionX[i] * mantlePlumeScale, context.PositionY[i] * mantlePlumeScale, context.PositionZ[i] * mantlePlumeScale) + 1f);
+                    n += (context.Noise.Get(context.PositionX[i] * mantlePlumeScale2, context.PositionY[i] * mantlePlumeScale2, context.PositionZ[i] * mantlePlumeScale2) + 1f) * 0.5f;
+                    mpv *= n;
+                }
+                data[i] = mpv;
+            }
 
             //断裂带计算
             if (zoomLevel == 0)
@@ -419,23 +448,20 @@ namespace PlanetGenerator.Layers
                 context.Textures.Add(new LayerTexture("FaultZone", faultZone, context.Settings.TileResolution * context.Settings.TextureMultiple));
                 if (context.Settings.TextureMultiple == 1)
                 {
-                    for (int i = 0; i < length; i++)
+                    PlanetHelper.GetLocations(index, zoomLevel, 1024, out var longitudes, out var latitudes);
+                    for (int i = 0; i < _FaultZoneLength; i++)
                     {
-                        var value = context.Noise.Get(context.PositionX[i] / 500f, context.PositionY[i] / 500f, context.PositionZ[i] / 500f) * 0.5f;
-                        value += context.Noise.Get(context.PositionX[i] / 250f, context.PositionY[i] / 250f, context.PositionZ[i] / 250f) * 0.25f;
-                        value += context.Noise.Get(context.PositionX[i] / 125f, context.PositionY[i] / 125f, context.PositionZ[i] / 125f) * 0.25f;
-                        if (value < 0.25f)
-                            value = 0f;
-                        else
+                        float value = 0;
+                        for (int j = 0; j < _mantlePlumes!.Length; j++)
                         {
-                            value = (value * 4f - 1f) / 3f * 2f;
-                            if (value > 1f)
-                                value = 1f;
+                            var d = PlanetHelper.GetDistance(longitudes[i], latitudes[i], _mantlePlumes[j].X, _mantlePlumes[j].Y, context.Settings.PlanetRadius);
+                            if (d < 100f)
+                            {
+                                value += 1 - d / 100f;
+                                if (value > 1)
+                                    value = 1;
+                            }
                         }
-                        //else
-                        //    value = (value - 0.5f) * 2f;
-                        //value += 1;
-                        //value /= 2;
                         faultZone[i] = value;
                     }
                 }
@@ -443,15 +469,6 @@ namespace PlanetGenerator.Layers
             context.CreateLayer(PlanetLayers.Plate, data);
         }
 
-        private float GetDistance(float lng1, float lat1, float lng2, float lat2, float radius)
-        {
-            float a = lat1 - lat2;
-            float b = lng1 - lng2;
-            float s = 2 * MathF.Asin(MathF.Sqrt(
-                    MathF.Pow(MathF.Sin(a / 2), 2) + MathF.Cos(lat1) * MathF.Cos(lat2) * MathF.Pow(MathF.Sin(b / 2), 2)));
-            s = s * radius;
-            return s;
-        }
         public float GetAngle(float lng1, float lat1, float lng2, float lat2)
         {
             var px1 = MathF.Cos(lat1) * MathF.Cos(lng1);
